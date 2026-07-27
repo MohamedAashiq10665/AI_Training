@@ -2,61 +2,55 @@
   {
     "model":"llama3:8b",
     "prompt":"Find three available Python developers with Azure experience for a healthcare modernization project.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":111.873,
+    "memory_delta_mb":5.812,
+    "prompt_eval_count":25,
+    "eval_count":474,
+    "success":true
   },
   {
     "model":"llama3:8b",
     "prompt":"Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":74.909,
+    "memory_delta_mb":0.609,
+    "prompt_eval_count":29,
+    "eval_count":442,
+    "success":true
   },
   {
     "model":"llama3:8b",
     "prompt":"Identify bench resources suitable for DevOps automation initiatives in the telecom domain.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":82.863,
+    "memory_delta_mb":0.523,
+    "prompt_eval_count":25,
+    "eval_count":493,
+    "success":true
   },
   {
     "model":"phi3:mini",
     "prompt":"Find three available Python developers with Azure experience for a healthcare modernization project.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":88.245,
+    "memory_delta_mb":1.043,
+    "prompt_eval_count":25,
+    "eval_count":841,
+    "success":true
   },
   {
     "model":"phi3:mini",
     "prompt":"Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":31.456,
+    "memory_delta_mb":0.73,
+    "prompt_eval_count":32,
+    "eval_count":309,
+    "success":true
   },
   {
     "model":"phi3:mini",
     "prompt":"Identify bench resources suitable for DevOps automation initiatives in the telecom domain.",
-    "latency_seconds":null,
-    "memory_delta_mb":null,
-    "prompt_eval_count":0,
-    "eval_count":0,
-    "success":false,
-    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+    "latency_seconds":107.165,
+    "memory_delta_mb":0.75,
+    "prompt_eval_count":29,
+    "eval_count":1037,
+    "success":true
   }
 ]

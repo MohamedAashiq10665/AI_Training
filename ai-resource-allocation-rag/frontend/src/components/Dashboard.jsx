@@ -117,7 +117,7 @@ function SectionHeader({ title, subtitle, action }) {
   );
 }
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, onShowEmployees }) {
   const [analytics, setAnalytics] = useState(null);
   const [utilization, setUtilization] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -204,9 +204,14 @@ export default function Dashboard({ onLogout }) {
               RAG-powered staffing recommendations, bench insights, and utilization analytics.
             </Typography>
           </Box>
-          <Button variant="outlined" color="inherit" onClick={onLogout} sx={{ borderRadius: 2 }}>
-            Logout
-          </Button>
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="outlined" onClick={onShowEmployees} sx={{ borderRadius: 2 }}>
+              Employees
+            </Button>
+            <Button variant="outlined" color="inherit" onClick={onLogout} sx={{ borderRadius: 2 }}>
+              Logout
+            </Button>
+          </Stack>
         </Stack>
 
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -217,6 +222,46 @@ export default function Dashboard({ onLogout }) {
           </Box>
         ) : (
           <>
+            <Card sx={{ ...sectionCardStyle, borderRadius: 3, mb: 5 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <SectionHeader
+                  title="AI Staffing Recommendation"
+                  subtitle="Generate role-fit suggestions with explainable match details."
+                />
+                <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                  <TextField
+                    fullWidth
+                    label="Required Skills (comma separated)"
+                    value={skills}
+                    onChange={(e) => setSkills(e.target.value)}
+                  />
+                  <Button variant="contained" onClick={runRecommendation} sx={{ background: "#1f6b75", minWidth: 150 }} disabled={recommendLoading}>
+                    {recommendLoading ? "Recommending..." : "Recommend"}
+                  </Button>
+                </Box>
+                {recommendations.length === 0 && (
+                  <Typography variant="body2" sx={{ color: "#65737d", mb: 2 }}>
+                    No recommendations yet. Enter skills and click Recommend.
+                  </Typography>
+                )}
+                {recommendations.map((r) => (
+                  <Box key={r.employee_id} sx={{ p: 2, border: "1px solid #e5ddd2", borderRadius: 2, mb: 1.5 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      {r.employee_name} ({r.employee_id}) - {r.match_score}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>{r.recommendation_reason}</Typography>
+                    <Chip label={`Availability: ${r.availability}`} sx={{ mr: 1, mb: 1 }} />
+                    {r.skills_matched?.map((s) => (
+                      <Chip key={`${r.employee_id}-${s}`} color="success" label={`Matched: ${s}`} sx={{ mr: 1, mb: 1 }} />
+                    ))}
+                    {r.missing_skills?.map((s) => (
+                      <Chip key={`${r.employee_id}-missing-${s}`} color="warning" label={`Missing: ${s}`} sx={{ mr: 1, mb: 1 }} />
+                    ))}
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+
             <Box sx={{ mb: 5 }}>
               <SectionHeader title="Workforce Snapshot" subtitle="Current bench health and utilization coverage." />
               <Grid container spacing={3} columns={12}>
@@ -354,45 +399,6 @@ export default function Dashboard({ onLogout }) {
               </Grid>
             </Box>
 
-            <Card sx={{ ...sectionCardStyle, borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <SectionHeader
-                  title="AI Staffing Recommendation"
-                  subtitle="Generate role-fit suggestions with explainable match details."
-                />
-                <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
-                  <TextField
-                    fullWidth
-                    label="Required Skills (comma separated)"
-                    value={skills}
-                    onChange={(e) => setSkills(e.target.value)}
-                  />
-                  <Button variant="contained" onClick={runRecommendation} sx={{ background: "#1f6b75", minWidth: 150 }} disabled={recommendLoading}>
-                    {recommendLoading ? "Recommending..." : "Recommend"}
-                  </Button>
-                </Box>
-                {recommendations.length === 0 && (
-                  <Typography variant="body2" sx={{ color: "#65737d", mb: 2 }}>
-                    No recommendations yet. Enter skills and click Recommend.
-                  </Typography>
-                )}
-                {recommendations.map((r) => (
-                  <Box key={r.employee_id} sx={{ p: 2, border: "1px solid #e5ddd2", borderRadius: 2, mb: 1.5 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                      {r.employee_name} ({r.employee_id}) - {r.match_score}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>{r.recommendation_reason}</Typography>
-                    <Chip label={`Availability: ${r.availability}`} sx={{ mr: 1, mb: 1 }} />
-                    {r.skills_matched?.map((s) => (
-                      <Chip key={`${r.employee_id}-${s}`} color="success" label={`Matched: ${s}`} sx={{ mr: 1, mb: 1 }} />
-                    ))}
-                    {r.missing_skills?.map((s) => (
-                      <Chip key={`${r.employee_id}-missing-${s}`} color="warning" label={`Missing: ${s}`} sx={{ mr: 1, mb: 1 }} />
-                    ))}
-                  </Box>
-                ))}
-              </CardContent>
-            </Card>
           </>
         )}
       </Container>

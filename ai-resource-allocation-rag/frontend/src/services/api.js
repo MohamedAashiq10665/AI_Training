@@ -64,6 +64,19 @@ async function withAuth(call) {
 export const getAnalytics = async () => (await withAuth(() => api.get("/analytics"))).data;
 export const getBench = async () => (await withAuth(() => api.get("/bench"))).data;
 export const getUtilization = async () => (await withAuth(() => api.get("/utilization"))).data;
+export const getEmployees = async (limit = 500) =>
+  (await withAuth(() => api.get("/employees", { params: { limit } }))).data;
+export const getProjectTeams = async () => (await withAuth(() => api.get("/project-teams"))).data;
+export const getProjects = async (limit = 500) =>
+  (await withAuth(() => api.get("/projects", { params: { limit } }))).data;
+export const getProjectDetails = async (projectId) =>
+  (await withAuth(() => api.get(`/projects/${projectId}/details`))).data;
+export const assignEmployeeToProject = async (projectId, payload) =>
+  (await withAuth(() => api.post(`/projects/${projectId}/assign`, payload))).data;
+export const unassignEmployeeFromProject = async (projectId, payload) =>
+  (await withAuth(() => api.post(`/projects/${projectId}/unassign`, payload))).data;
+export const getProjectAiRecommendations = async (projectId, payload) =>
+  (await withAuth(() => api.post(`/projects/${projectId}/ai-recommend-chat`, payload))).data;
 
 export const getRecommendations = async (payload) =>
   (await withAuth(() => api.post("/recommend", payload))).data;

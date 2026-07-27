@@ -1,0 +1,141 @@
+1. Opening (45 seconds)
+Good morning.
+Today I am presenting my capstone project: AI-Powered Resource Allocation and Bench Management with RAG.
+
+The problem I focused on is that staffing decisions are often manual, slow, and hard to justify. Teams struggle to quickly find the right people, reduce bench time, and maintain utilization.
+
+My solution is an end-to-end MVP that combines secure APIs, workforce analytics, and AI-based recommendation logic to help managers make faster and more explainable staffing decisions.
+
+2. What I Built (1 minute)
+The system has three main parts:
+
+Backend services for authentication, role-based access, employee analytics, and recommendations.
+Frontend dashboard for operational visibility and recommendation workflows.
+AI layer using retrieval-augmented generation and model benchmarking.
+Key capabilities include:
+
+Login with JWT and role-based permissions.
+Workforce analytics such as bench percentage and utilization.
+Recommendation engine for project-role matching.
+Explainability with matched skills and missing skills.
+Benchmark artifacts for comparing model behavior.
+Tests and documentation for production-style quality.
+3. Demo Agenda (15 seconds)
+I will show:
+
+Secure login and access control.
+Dashboard analytics and charts.
+End-to-end recommendation generation.
+Quality evidence: tests and benchmark artifacts.
+Architecture summary and business impact.
+4. Live Demo Script (7 to 8 minutes)
+
+Part A: Login and Security (1 minute)
+Now I am opening the application and logging in as a manager user.
+
+What I want to highlight:
+
+The application requires authentication for protected APIs.
+Role-based access is enforced for endpoints like bench and recommendation.
+This ensures enterprise-style access control from day one.
+Part B: Workforce Command Center (2 minutes)
+This is the main dashboard.
+
+I will walk through these metrics:
+
+Total employees.
+Available employees.
+Bench percentage.
+Overall utilization.
+Now the visual analytics:
+
+Bench by skill shows where idle capacity exists.
+Historical allocation trend shows staffing movement over time.
+Skill demand trend highlights market/project pull.
+Upcoming project demand shows domain-level hiring pressure.
+Business interpretation:
+This gives managers instant supply-demand visibility, so staffing decisions are not based on guesswork.
+
+Part C: AI Recommendation Flow (2.5 minutes)
+Now I will enter required skills, for example Python and Azure, and trigger the recommendation.
+
+Here is what the output includes:
+
+Ranked candidates.
+Match score.
+Matched skills.
+Missing skills.
+Availability.
+Recommendation reason.
+What this proves:
+
+The system is not just filtering profiles.
+It combines retrieval and scoring.
+It returns explainable recommendations that can be defended in review meetings.
+Part D: API Proof (optional fallback, 1 minute)
+If needed, I can quickly validate via API:
+
+Health endpoint returns service status.
+Login returns token.
+Authenticated analytics endpoint returns workforce metrics.
+Recommendation endpoint returns ranked candidate list.
+This confirms backend correctness even if UI has transient issues.
+
+Part E: Benchmark and Engineering Quality (1.5 minutes)
+Now I’ll show quality evidence:
+
+Automated tests pass for integration and core logic.
+Benchmark artifacts are generated in CSV, JSON, and Markdown formats.
+This enables model-level comparison and reproducibility.
+Important note:
+During development, there were environment-level Docker daemon issues on host.
+So I validated full functionality using the local run path, and documented both local and Docker workflows.
+
+5. Architecture Explanation (2 minutes)
+High-level architecture:
+
+Frontend sends authenticated requests.
+FastAPI backend validates token and role.
+Backend pulls employee and project signals from persistence.
+RAG pipeline retrieves relevant context candidates.
+Scoring logic computes fit using skills, experience, utilization, and availability.
+API returns explainable recommendation objects to UI.
+Design choices:
+
+JWT + RBAC for security.
+Repository and service layering for maintainability.
+Explainability-first recommendation output.
+Benchmarking and tests for quality control.
+6. Business Value Summary (1 minute)
+This project creates value in four ways:
+
+Faster staffing cycles:
+Managers spend less time manually searching and comparing resources.
+
+Better utilization:
+Idle capacity is visible and can be redirected faster.
+
+Better match quality:
+Recommendations combine structured data and retrieval context.
+
+Better governance:
+Reasoned recommendations support transparent, auditable decisions.
+
+7. Limitations and Next Steps (1 minute)
+Current limitations:
+
+Model quality depends on data freshness and profile completeness.
+Docker setup depends on host daemon health.
+Recommendation weighting is rule-based and can be improved with feedback loops.
+Next steps:
+
+Introduce user feedback learning from accepted/rejected recommendations.
+Add scenario simulation for future demand planning.
+Move to managed production infrastructure and CI/CD quality gates.
+Add pagination and advanced filters for employee exploration.
+8. Closing (30 seconds)
+To conclude, this capstone delivers a production-style, end-to-end AI staffing system with security, analytics, explainable recommendations, testing, and benchmark reporting.
+
+It demonstrates not only model usage, but also practical software engineering needed to operationalize AI in enterprise workflows.
+
+Thank you. I’m happy to take questions.

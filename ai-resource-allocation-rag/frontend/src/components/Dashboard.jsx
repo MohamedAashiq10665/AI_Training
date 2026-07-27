@@ -25,9 +25,35 @@ import {
   Line,
   CartesianGrid,
 } from "recharts";
-import { getAnalytics, getRecommendations, getUtilization } from "../services/api";
+import { askStaffingChat, getAnalytics, getRecommendations, getUtilization } from "../services/api";
 
 const AXIS_TICK = { fontSize: 12, fill: "#4c6370" };
+const STAFFING_QUERY_HINT =
+  "Ask about staffing, skills, experience, availability, utilization, bench, assignments, or project allocation decisions.";
+const STAFFING_KEYWORDS = [
+  "employee",
+  "employees",
+  "resource",
+  "resources",
+  "staff",
+  "staffing",
+  "allocation",
+  "allocate",
+  "unassign",
+  "assign",
+  "project",
+  "projects",
+  "skill",
+  "skills",
+  "availability",
+  "utilization",
+  "bench",
+  "candidate",
+  "candidates",
+  "role",
+  "roles",
+  "experience",
+];
 
 const truncateLabel = (value, max = 12) => {
   if (!value) return "";
@@ -93,6 +119,24 @@ const metricCard = (title, value) => (
   </Card>
 );
 
+const validateStaffingPrompt = (value) => {
+  const normalized = value.trim().toLowerCase();
+
+  if (!normalized) {
+    return "Enter a staffing question before sending the request.";
+  }
+
+  if (normalized.length < 12) {
+    return "Enter a more specific staffing question so the AI can respond meaningfully.";
+  }
+
+  if (!STAFFING_KEYWORDS.some((keyword) => normalized.includes(keyword))) {
+    return STAFFING_QUERY_HINT;
+  }
+
+  return "";
+};
+
 function SectionHeader({ title, subtitle, action }) {
   return (
     <Stack
@@ -122,9 +166,13 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
   const [utilization, setUtilization] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [skills, setSkills] = useState("Python,Azure");
+  const [chatPrompt, setChatPrompt] = useState("");
+  const [chatResponse, setChatResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recommendLoading, setRecommendLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState("");
   const isViewer = role === "viewer";
   const canManage = role === "admin" || role === "manager";
 
@@ -195,6 +243,31 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
       setError(message);
     } finally {
       setRecommendLoading(false);
+    }
+  };
+
+  const handleAskStaffingChat = async () => {
+    const validationError = validateStaffingPrompt(chatPrompt);
+    if (validationError) {
+      setChatError(validationError);
+      setChatResponse(null);
+      return;
+    }
+
+    setChatLoading(true);
+    setChatError("");
+    try {
+      const response = await askStaffingChat({
+        query: chatPrompt.trim(),
+        top_k: 5,
+      });
+      setChatResponse(response);
+    } catch (err) {
+      const message = err?.response?.data?.detail || err?.message || "Failed to fetch AI chat response.";
+      setChatError(message);
+      setChatResponse(null);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -279,6 +352,65 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
                     ))}
                   </Box>
                 ))}
+              </CardContent>
+            </Card>
+
+            <Card sx={{ ...sectionCardStyle, borderRadius: 3, mb: 5 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <SectionHeader
+                  title="AI Recommendation Chat"
+                  subtitle="Ask staffing questions about skills, bench, utilization, and project allocation decisions."
+                />
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  {STAFFING_QUERY_HINT}
+                </Alert>
+                {chatError && <Alert severity="error" sx={{ mb: 2 }}>{chatError}</Alert>}
+                <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    label="Ask the staffing assistant"
+                    placeholder="Example: Which employees with Azure skills and lower utilization should we prioritize for the next healthcare project?"
+                    value={chatPrompt}
+                    onChange={(e) => {
+                      setChatPrompt(e.target.value);
+                      if (chatError) {
+                        setChatError("");
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleAskStaffingChat}
+                    sx={{ background: "#9f4f35", minWidth: 150 }}
+                    disabled={chatLoading}
+                  >
+                    {chatLoading ? "Thinking..." : "Ask AI"}
+                  </Button>
+                </Box>
+                {!chatResponse?.answer && (
+                  <Typography variant="body2" sx={{ color: "#65737d" }}>
+                    The response is limited to workforce staffing and allocation use cases.
+                  </Typography>
+                )}
+                {chatResponse?.answer && (
+                  <Box sx={{ p: 2, border: "1px solid #e5ddd2", borderRadius: 2, background: "#fffaf5" }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                      AI Response
+                    </Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", mb: chatResponse?.sources?.length ? 1.5 : 0 }}>
+                      {chatResponse.answer}
+                    </Typography>
+                    {chatResponse?.sources?.length > 0 && (
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {chatResponse.sources.map((sourceId) => (
+                          <Chip key={sourceId} label={`Source: ${sourceId}`} size="small" variant="outlined" />
+                        ))}
+                      </Stack>
+                    )}
+                  </Box>
+                )}
               </CardContent>
             </Card>
 

@@ -27,6 +27,8 @@
 
 ## Chat Scope Guardrails
 
+- Dashboard chat performs lightweight client-side validation before sending requests.
+- Empty, too-short, and non-staffing prompts are blocked in the UI with guidance.
 - Chat endpoints accept only staffing/allocation-related queries.
 - Out-of-scope prompts return HTTP 400 with a clear supported-scope explanation.
 

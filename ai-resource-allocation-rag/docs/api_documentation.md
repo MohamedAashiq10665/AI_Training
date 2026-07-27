@@ -78,6 +78,8 @@ Returns RAG-grounded answer and source employee IDs.
 
 Validation behavior:
 
+- Empty queries are rejected.
+- Very short queries should be refined on the frontend before submission.
 - Chat supports only workforce staffing/allocation queries.
 - Unrelated prompts (for example weather, jokes, general trivia) return HTTP 400.
 - Error detail clearly states the supported scope.

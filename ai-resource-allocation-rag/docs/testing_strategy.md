@@ -32,3 +32,5 @@
 
 - Validate staffing-related prompts are accepted on `/chat` and `/projects/{project_id}/ai-recommend-chat`.
 - Validate unrelated prompts return HTTP 400 with explicit supported-topic error details.
+- Validate dashboard UI blocks empty and too-short chat prompts before network submission.
+- Validate dashboard UI guidance appears when a prompt does not match staffing/allocation intent.

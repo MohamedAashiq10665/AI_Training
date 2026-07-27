@@ -80,6 +80,7 @@ Role behavior in current UI:
 
 - `admin` and `manager`: full recommendation and project allocation actions.
 - `viewer`: read-only workspace (cannot assign, unassign, or trigger recommendation generation actions).
+- `admin`, `manager`, and `viewer`: can use the dashboard staffing chat, subject to staffing-topic validation.
 
 Core operational endpoints now include:
 
@@ -93,6 +94,7 @@ Core operational endpoints now include:
 Chat scope guardrails:
 
 - `/chat` and project AI chat support staffing/allocation queries only.
+- The dashboard performs lightweight prompt validation before calling `/chat`.
 - Unrelated prompts return HTTP 400 with supported-scope detail.
 
 ## 7. Run Benchmark Automatically

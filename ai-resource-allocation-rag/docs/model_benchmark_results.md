@@ -1,0 +1,17 @@
+# Automated Model Benchmark Results
+
+## Summary
+| model | avg_latency_seconds | avg_memory_delta_mb | avg_eval_count | success_rate |
+| --- | --- | --- | --- | --- |
+| llama3:8b | nan | nan | 0.0 | 0.0 |
+| phi3:mini | nan | nan | 0.0 | 0.0 |
+
+## Raw Results
+| model | prompt | latency_seconds | memory_delta_mb | prompt_eval_count | eval_count | success | error |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| llama3:8b | Find three available Python developers with Azure experience for a healthcare modernization project. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |
+| llama3:8b | Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |
+| llama3:8b | Identify bench resources suitable for DevOps automation initiatives in the telecom domain. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |
+| phi3:mini | Find three available Python developers with Azure experience for a healthcare modernization project. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |
+| phi3:mini | Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |
+| phi3:mini | Identify bench resources suitable for DevOps automation initiatives in the telecom domain. | None | None | 0 | 0 | False | [WinError 10061] No connection could be made because the target machine actively refused it |

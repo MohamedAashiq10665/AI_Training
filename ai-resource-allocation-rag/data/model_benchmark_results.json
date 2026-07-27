@@ -1,0 +1,62 @@
+[
+  {
+    "model":"llama3:8b",
+    "prompt":"Find three available Python developers with Azure experience for a healthcare modernization project.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  {
+    "model":"llama3:8b",
+    "prompt":"Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  {
+    "model":"llama3:8b",
+    "prompt":"Identify bench resources suitable for DevOps automation initiatives in the telecom domain.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  {
+    "model":"phi3:mini",
+    "prompt":"Find three available Python developers with Azure experience for a healthcare modernization project.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  {
+    "model":"phi3:mini",
+    "prompt":"Recommend two data engineers with cloud certifications and 5+ years experience for a fintech migration.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  },
+  {
+    "model":"phi3:mini",
+    "prompt":"Identify bench resources suitable for DevOps automation initiatives in the telecom domain.",
+    "latency_seconds":null,
+    "memory_delta_mb":null,
+    "prompt_eval_count":0,
+    "eval_count":0,
+    "success":false,
+    "error":"[WinError 10061] No connection could be made because the target machine actively refused it"
+  }
+]

@@ -1,0 +1,101 @@
+project_id,project_name,required_skills,preferred_certifications,min_experience,required_headcount,location,domain
+PRJ001,Public Sector Transformation 1,Python;SQL,Databricks-Associate;Azure-AZ900,4,7,Cairo,Retail
+PRJ002,Healthcare Transformation 2,Python;AWS,GCP-ACE;CKA,7,7,Bangalore,Telecom
+PRJ003,Healthcare Transformation 3,Azure;SQL;Python;Data Engineering,AWS-SA;PMP,6,7,London,Public Sector
+PRJ004,Public Sector Transformation 4,Data Engineering;GCP;Azure,Azure-AZ900;CKA,8,6,Cairo,Retail
+PRJ005,Healthcare Transformation 5,React;SQL,PMP;AWS-SA,10,4,Riyadh,Healthcare
+PRJ006,Telecom Transformation 6,GCP;SQL;Machine Learning;Data Engineering,CKA;PMP,9,8,Dubai,Retail
+PRJ007,Healthcare Transformation 7,DevOps;Python;Machine Learning,GCP-ACE;AWS-SA,8,7,Dubai,Finance
+PRJ008,Retail Transformation 8,React;Data Engineering;Python,Azure-AZ900;GCP-ACE,3,5,Remote,Retail
+PRJ009,Telecom Transformation 9,SQL;AWS,GCP-ACE;ScrumMaster,5,6,Riyadh,Finance
+PRJ010,Finance Transformation 10,Azure;DevOps;Machine Learning;Java,ScrumMaster;GCP-ACE,5,3,Dubai,Finance
+PRJ011,Healthcare Transformation 11,Data Engineering;AWS;Java;Python,Databricks-Associate;ScrumMaster,9,6,Cairo,Public Sector
+PRJ012,Public Sector Transformation 12,DevOps;Data Engineering,GCP-ACE;CKA,6,5,Dubai,Public Sector
+PRJ013,Healthcare Transformation 13,React;Azure;AWS,PMP;CKA,9,6,Cairo,Public Sector
+PRJ014,Healthcare Transformation 14,React;AWS;DevOps,Databricks-Associate;PMP,9,4,Remote,Healthcare
+PRJ015,Public Sector Transformation 15,Azure;React,AWS-SA;GCP-ACE,7,6,Riyadh,Finance
+PRJ016,Public Sector Transformation 16,GCP;Azure;Machine Learning;SQL,GCP-ACE;ScrumMaster,4,5,Bangalore,Finance
+PRJ017,Retail Transformation 17,Data Engineering;Machine Learning;React,CKA;Azure-AZ900,4,6,Remote,Finance
+PRJ018,Public Sector Transformation 18,GCP;Azure,CKA;ScrumMaster,5,3,Remote,Finance
+PRJ019,Telecom Transformation 19,Python;AWS;React,Azure-AZ900;Databricks-Associate,10,6,Remote,Retail
+PRJ020,Telecom Transformation 20,GCP;Machine Learning;Python,AWS-SA;Databricks-Associate,4,2,Dubai,Retail
+PRJ021,Retail Transformation 21,Java;DevOps;Data Engineering,GCP-ACE;ScrumMaster,10,6,Riyadh,Retail
+PRJ022,Retail Transformation 22,React;Java,ScrumMaster;Databricks-Associate,5,6,London,Public Sector
+PRJ023,Retail Transformation 23,GCP;Data Engineering,Databricks-Associate;PMP,9,8,Remote,Telecom
+PRJ024,Telecom Transformation 24,React;GCP,Databricks-Associate;Azure-AZ900,4,7,Riyadh,Telecom
+PRJ025,Finance Transformation 25,Machine Learning;React;Java;Python,GCP-ACE;Azure-AZ900,7,4,Remote,Retail
+PRJ026,Retail Transformation 26,GCP;React;Machine Learning;Azure,Databricks-Associate;PMP,10,5,Bangalore,Finance
+PRJ027,Finance Transformation 27,Python;AWS,Databricks-Associate;GCP-ACE,3,3,Dubai,Telecom
+PRJ028,Telecom Transformation 28,Java;Machine Learning,PMP;AWS-SA,2,8,Bangalore,Public Sector
+PRJ029,Public Sector Transformation 29,Java;GCP,Azure-AZ900;AWS-SA,8,4,Dubai,Finance
+PRJ030,Public Sector Transformation 30,GCP;DevOps;AWS;Java,ScrumMaster;Azure-AZ900,2,2,Remote,Retail
+PRJ031,Public Sector Transformation 31,DevOps;Machine Learning;GCP,CKA;Azure-AZ900,10,3,London,Public Sector
+PRJ032,Retail Transformation 32,Machine Learning;React;GCP,CKA;PMP,5,8,Cairo,Telecom
+PRJ033,Finance Transformation 33,Data Engineering;React;GCP,GCP-ACE;AWS-SA,2,6,Dubai,Retail
+PRJ034,Telecom Transformation 34,DevOps;SQL;Python,ScrumMaster;CKA,6,2,Bangalore,Retail
+PRJ035,Telecom Transformation 35,Azure;Python;Data Engineering;Java,PMP;CKA,8,3,Dubai,Telecom
+PRJ036,Telecom Transformation 36,Azure;GCP;Java,Databricks-Associate;Azure-AZ900,10,8,London,Retail
+PRJ037,Finance Transformation 37,SQL;GCP;React,ScrumMaster;AWS-SA,4,3,Riyadh,Healthcare
+PRJ038,Public Sector Transformation 38,DevOps;Machine Learning;GCP;Data Engineering,CKA;Azure-AZ900,7,2,Dubai,Healthcare
+PRJ039,Retail Transformation 39,Python;AWS;Java;SQL,Azure-AZ900;Databricks-Associate,9,7,Cairo,Finance
+PRJ040,Telecom Transformation 40,AWS;Python,Azure-AZ900;GCP-ACE,8,4,Bangalore,Retail
+PRJ041,Finance Transformation 41,Python;Data Engineering;Java,AWS-SA;GCP-ACE,8,2,London,Telecom
+PRJ042,Telecom Transformation 42,Azure;GCP,ScrumMaster;AWS-SA,3,8,Remote,Finance
+PRJ043,Finance Transformation 43,DevOps;Azure;Python,CKA;Databricks-Associate,3,6,Remote,Finance
+PRJ044,Finance Transformation 44,React;GCP;Data Engineering,Databricks-Associate;ScrumMaster,2,7,London,Public Sector
+PRJ045,Retail Transformation 45,GCP;DevOps,Azure-AZ900;GCP-ACE,2,8,Remote,Finance
+PRJ046,Retail Transformation 46,Azure;React,AWS-SA;Azure-AZ900,6,6,Cairo,Telecom
+PRJ047,Public Sector Transformation 47,Python;Machine Learning,ScrumMaster;Databricks-Associate,9,7,London,Finance
+PRJ048,Telecom Transformation 48,Java;Azure;AWS,AWS-SA;Databricks-Associate,7,8,Remote,Healthcare
+PRJ049,Public Sector Transformation 49,Data Engineering;AWS,ScrumMaster;AWS-SA,4,5,Dubai,Retail
+PRJ050,Telecom Transformation 50,Data Engineering;DevOps;Azure;Python,GCP-ACE;Databricks-Associate,4,4,Cairo,Telecom
+PRJ051,Telecom Transformation 51,DevOps;SQL;GCP;Machine Learning,Azure-AZ900;PMP,4,6,Riyadh,Retail
+PRJ052,Public Sector Transformation 52,DevOps;GCP;AWS;Python,Azure-AZ900;CKA,6,8,Riyadh,Public Sector
+PRJ053,Finance Transformation 53,DevOps;Python;React,AWS-SA;PMP,7,8,London,Finance
+PRJ054,Finance Transformation 54,Java;SQL;React,PMP;Databricks-Associate,9,8,London,Finance
+PRJ055,Retail Transformation 55,GCP;Data Engineering;React;SQL,AWS-SA;ScrumMaster,10,7,Cairo,Healthcare
+PRJ056,Finance Transformation 56,AWS;Python,AWS-SA;CKA,5,2,Cairo,Public Sector
+PRJ057,Retail Transformation 57,React;DevOps;GCP;Python,Azure-AZ900;PMP,3,2,Dubai,Telecom
+PRJ058,Retail Transformation 58,DevOps;Python,PMP;Databricks-Associate,8,8,Riyadh,Healthcare
+PRJ059,Healthcare Transformation 59,GCP;SQL;Python;Data Engineering,ScrumMaster;GCP-ACE,3,3,London,Healthcare
+PRJ060,Telecom Transformation 60,Azure;SQL,Azure-AZ900;ScrumMaster,10,7,Dubai,Public Sector
+PRJ061,Healthcare Transformation 61,AWS;SQL;React;Data Engineering,ScrumMaster;Databricks-Associate,7,7,Bangalore,Telecom
+PRJ062,Public Sector Transformation 62,AWS;Machine Learning,CKA;PMP,7,7,Dubai,Public Sector
+PRJ063,Retail Transformation 63,DevOps;Data Engineering;SQL;GCP,ScrumMaster;GCP-ACE,8,8,Remote,Telecom
+PRJ064,Public Sector Transformation 64,Data Engineering;Azure;SQL;DevOps,Databricks-Associate;GCP-ACE,7,5,Bangalore,Telecom
+PRJ065,Public Sector Transformation 65,Python;GCP,AWS-SA;PMP,4,4,Cairo,Retail
+PRJ066,Healthcare Transformation 66,Azure;Data Engineering,ScrumMaster;Databricks-Associate,6,6,London,Public Sector
+PRJ067,Telecom Transformation 67,Machine Learning;AWS;Java;Python,GCP-ACE;Azure-AZ900,4,4,Riyadh,Public Sector
+PRJ068,Retail Transformation 68,Azure;GCP,AWS-SA;PMP,8,6,Dubai,Healthcare
+PRJ069,Public Sector Transformation 69,Data Engineering;DevOps;AWS;Azure,ScrumMaster;AWS-SA,6,2,Remote,Public Sector
+PRJ070,Retail Transformation 70,Java;Python;Data Engineering,ScrumMaster;CKA,8,8,Cairo,Finance
+PRJ071,Retail Transformation 71,Machine Learning;Python;React;SQL,PMP;AWS-SA,7,6,London,Finance
+PRJ072,Healthcare Transformation 72,SQL;Azure;AWS,Databricks-Associate;ScrumMaster,8,5,London,Public Sector
+PRJ073,Telecom Transformation 73,Java;Azure;React;AWS,Azure-AZ900;ScrumMaster,7,2,Bangalore,Public Sector
+PRJ074,Healthcare Transformation 74,Python;SQL;React;AWS,CKA;PMP,8,8,Remote,Finance
+PRJ075,Finance Transformation 75,DevOps;SQL,CKA;ScrumMaster,5,6,London,Public Sector
+PRJ076,Retail Transformation 76,Azure;Java,ScrumMaster;CKA,7,7,London,Healthcare
+PRJ077,Retail Transformation 77,React;Machine Learning,GCP-ACE;Azure-AZ900,7,4,London,Healthcare
+PRJ078,Public Sector Transformation 78,AWS;Data Engineering;DevOps,Azure-AZ900;CKA,2,8,Dubai,Finance
+PRJ079,Healthcare Transformation 79,Data Engineering;AWS;Java;Python,Azure-AZ900;PMP,4,8,Riyadh,Healthcare
+PRJ080,Telecom Transformation 80,Java;GCP;DevOps,AWS-SA;GCP-ACE,5,7,London,Finance
+PRJ081,Retail Transformation 81,SQL;Machine Learning,PMP;CKA,4,7,Remote,Healthcare
+PRJ082,Retail Transformation 82,Machine Learning;SQL;Python,Azure-AZ900;AWS-SA,6,3,Remote,Public Sector
+PRJ083,Healthcare Transformation 83,Python;DevOps;Machine Learning,CKA;Databricks-Associate,6,7,Remote,Retail
+PRJ084,Telecom Transformation 84,Python;GCP,Azure-AZ900;CKA,10,7,Cairo,Retail
+PRJ085,Finance Transformation 85,Machine Learning;SQL;Java,Azure-AZ900;PMP,9,6,Remote,Healthcare
+PRJ086,Retail Transformation 86,Azure;SQL,GCP-ACE;CKA,8,7,Dubai,Healthcare
+PRJ087,Finance Transformation 87,Data Engineering;Machine Learning;GCP,PMP;GCP-ACE,2,7,Riyadh,Telecom
+PRJ088,Finance Transformation 88,SQL;GCP,Azure-AZ900;GCP-ACE,8,7,Dubai,Healthcare
+PRJ089,Finance Transformation 89,React;SQL;Azure;DevOps,PMP;Azure-AZ900,8,4,London,Retail
+PRJ090,Finance Transformation 90,SQL;AWS;Azure,PMP;ScrumMaster,5,8,Dubai,Retail
+PRJ091,Finance Transformation 91,SQL;AWS;React;DevOps,Databricks-Associate;PMP,4,4,Cairo,Public Sector
+PRJ092,Finance Transformation 92,Java;AWS;Data Engineering;React,Databricks-Associate;AWS-SA,7,5,Bangalore,Retail
+PRJ093,Healthcare Transformation 93,GCP;AWS;Azure,Azure-AZ900;ScrumMaster,2,8,London,Public Sector
+PRJ094,Finance Transformation 94,Machine Learning;Azure;SQL,Databricks-Associate;AWS-SA,7,2,Remote,Telecom
+PRJ095,Retail Transformation 95,SQL;DevOps,Azure-AZ900;CKA,9,5,Dubai,Finance
+PRJ096,Telecom Transformation 96,Azure;Python,ScrumMaster;AWS-SA,6,5,Dubai,Finance
+PRJ097,Telecom Transformation 97,Java;AWS,ScrumMaster;PMP,9,7,Riyadh,Telecom
+PRJ098,Healthcare Transformation 98,React;Machine Learning,PMP;Databricks-Associate,8,7,Riyadh,Telecom
+PRJ099,Healthcare Transformation 99,Machine Learning;SQL;Python;GCP,CKA;ScrumMaster,2,3,London,Public Sector
+PRJ100,Public Sector Transformation 100,Python;SQL;React,ScrumMaster;Databricks-Associate,2,3,Riyadh,Telecom

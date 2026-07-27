@@ -117,7 +117,7 @@ function SectionHeader({ title, subtitle, action }) {
   );
 }
 
-export default function Dashboard({ onLogout, onShowEmployees }) {
+export default function Dashboard({ role, onLogout, onShowEmployees }) {
   const [analytics, setAnalytics] = useState(null);
   const [utilization, setUtilization] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -125,6 +125,8 @@ export default function Dashboard({ onLogout, onShowEmployees }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recommendLoading, setRecommendLoading] = useState(false);
+  const isViewer = role === "viewer";
+  const canManage = role === "admin" || role === "manager";
 
   useEffect(() => {
     const load = async () => {
@@ -170,6 +172,10 @@ export default function Dashboard({ onLogout, onShowEmployees }) {
   }, [analytics]);
 
   const runRecommendation = async () => {
+    if (!canManage) {
+      setError("Recommendation generation is available only for admin and manager roles.");
+      return;
+    }
     const payload = {
       project_name: "Healthcare Modernization",
       required_skills: skills.split(",").map((s) => s.trim()).filter(Boolean),
@@ -203,6 +209,14 @@ export default function Dashboard({ onLogout, onShowEmployees }) {
             <Typography variant="body1" sx={{ color: "#415564" }}>
               RAG-powered staffing recommendations, bench insights, and utilization analytics.
             </Typography>
+            <Box sx={{ mt: 1 }}>
+              <Chip
+                size="small"
+                label={isViewer ? "Role: Viewer (Read Only)" : `Role: ${role || "viewer"}`}
+                color={isViewer ? "warning" : "success"}
+                variant="outlined"
+              />
+            </Box>
           </Box>
           <Stack direction="row" spacing={1.5}>
             <Button variant="outlined" onClick={onShowEmployees} sx={{ borderRadius: 2 }}>
@@ -226,16 +240,22 @@ export default function Dashboard({ onLogout, onShowEmployees }) {
               <CardContent sx={{ p: 2.5 }}>
                 <SectionHeader
                   title="AI Staffing Recommendation"
-                  subtitle="Generate role-fit suggestions with explainable match details."
+                  subtitle={canManage ? "Generate role-fit suggestions with explainable match details." : "Available for manager/admin roles. Viewer has read-only access."}
                 />
+                {!canManage && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Recommendation generation is disabled for viewer role.
+                  </Alert>
+                )}
                 <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
                   <TextField
                     fullWidth
                     label="Required Skills (comma separated)"
                     value={skills}
                     onChange={(e) => setSkills(e.target.value)}
+                    disabled={!canManage}
                   />
-                  <Button variant="contained" onClick={runRecommendation} sx={{ background: "#1f6b75", minWidth: 150 }} disabled={recommendLoading}>
+                  <Button variant="contained" onClick={runRecommendation} sx={{ background: "#1f6b75", minWidth: 150 }} disabled={recommendLoading || !canManage}>
                     {recommendLoading ? "Recommending..." : "Recommend"}
                   </Button>
                 </Box>

@@ -9,9 +9,15 @@ This project is a production-style MVP that recommends best-fit employees for pr
 - Explainable staffing recommendations and skill-gap analysis
 - Bench and utilization analytics
 - JWT authentication and role-based access control (RBAC)
+- Role-aware frontend UX (viewer read-only, manager/admin operational actions)
 - PostgreSQL persistence for runtime APIs
 - FastAPI backend APIs
 - React dashboard with Material UI and Recharts
+- Employees/Projects operational workspace with dedicated project details view
+- Project allocation lifecycle: assign and unassign members
+- AI-driven fit candidates in project details
+- Cross-project AI recommendation chat
+- Chat guardrails that reject non-staffing questions with explicit error messages
 - Local LLM chat assistant through Ollama
 - Model comparison report (Llama 3 8B vs Phi-3 Mini)
 - Automated model benchmark runner for Ollama models
@@ -71,6 +77,12 @@ Authentication:
 - `POST /recommend`
 - `POST /chat`
 - `GET /employees`
+- `GET /project-teams`
+- `GET /projects`
+- `GET /projects/{project_id}/details`
+- `POST /projects/{project_id}/assign`
+- `POST /projects/{project_id}/unassign`
+- `POST /projects/{project_id}/ai-recommend-chat`
 - `GET /analytics`
 - `GET /bench`
 - `GET /utilization`

@@ -65,7 +65,7 @@ function compareValues(a, b, direction) {
   return 0;
 }
 
-export default function EmployeesPage({ onBackToDashboard, onLogout }) {
+export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
   const [employees, setEmployees] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +77,7 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [activeTab, setActiveTab] = useState("employees");
+  const [projectView, setProjectView] = useState("list");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [selectedProjectDetails, setSelectedProjectDetails] = useState(null);
   const [projectLoading, setProjectLoading] = useState(false);
@@ -85,6 +86,8 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiRecommendation, setAiRecommendation] = useState(null);
+  const isViewer = role === "viewer";
+  const canManage = role === "admin" || role === "manager";
 
   const loadEmployeesAndProjects = async () => {
     const [employeeData, projectData] = await Promise.all([getEmployees(500), getProjects(500)]);
@@ -188,6 +191,8 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
 
   const handleTabChange = (_event, value) => {
     setActiveTab(value);
+    setProjectView("list");
+    setSelectedProjectDetails(null);
     setQuery("");
     setSortDirection("asc");
     setPage(0);
@@ -207,6 +212,7 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
         setSelectedProjectDetails(null);
       } else {
         setSelectedProjectDetails(details);
+        setProjectView("details");
       }
     } catch (err) {
       const message = err?.response?.data?.detail || err?.message || "Failed to load project details.";
@@ -289,6 +295,14 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
     }
   };
 
+  const handleBackToProjectsList = () => {
+    setProjectView("list");
+    setProjectLoading(false);
+    setAiLoading(false);
+    setAiRecommendation(null);
+    setAiPrompt("");
+  };
+
   useEffect(() => {
     setPage(0);
   }, [query, sortKey, sortDirection, activeTab]);
@@ -304,6 +318,14 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
             <Typography variant="body1" sx={{ color: "#415564" }}>
               Manage employees and projects in separate operational tabs.
             </Typography>
+            <Box sx={{ mt: 1 }}>
+              <Chip
+                size="small"
+                label={isViewer ? "Role: Viewer (Read Only)" : `Role: ${role || "viewer"}`}
+                color={isViewer ? "warning" : "success"}
+                variant="outlined"
+              />
+            </Box>
           </Box>
           <Stack direction="row" spacing={1.5}>
             <Button variant="outlined" onClick={onBackToDashboard} sx={{ borderRadius: 2 }}>
@@ -317,6 +339,11 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {isViewer && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Viewer role has read-only access. Assign and unassign actions are disabled.
+          </Alert>
+        )}
 
         <Card sx={{ ...pageCardStyle, mb: 3 }}>
           <CardContent sx={{ p: 2.5 }}>
@@ -525,100 +552,178 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
                   </>
                 ) : (
                   <>
-                    <Box sx={{ px: 2.5, py: 2 }}>
-                      <Typography variant="subtitle2" sx={{ color: "#4f5e68" }}>
-                        Showing {filteredProjects.length} projects
-                      </Typography>
-                    </Box>
-                    <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
-                      <Table stickyHeader size="small">
-                        <TableHead>
-                          <TableRow sx={{
-                            "& .MuiTableCell-root": {
-                              backgroundColor: "#20323f",
-                              color: "#f8fafc",
-                              fontWeight: 700,
-                              letterSpacing: 0.3,
-                              borderBottom: "2px solid #162732",
-                              whiteSpace: "nowrap",
-                            },
-                            "& .MuiTableSortLabel-root": { color: "#f8fafc" },
-                            "& .MuiTableSortLabel-icon": { color: "#f8fafc !important" },
-                          }}>
-                            <TableCell>Project ID</TableCell>
-                            <TableCell>
-                              <TableSortLabel active={sortKey === "project_name"} direction={sortDirection} onClick={() => handleSort("project_name")}>Project Name</TableSortLabel>
-                            </TableCell>
-                            <TableCell>Required Skills</TableCell>
-                            <TableCell>
-                              <TableSortLabel active={sortKey === "required_headcount"} direction={sortDirection} onClick={() => handleSort("required_headcount")}>Headcount</TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                              <TableSortLabel active={sortKey === "allocated_count"} direction={sortDirection} onClick={() => handleSort("allocated_count")}>Allocated</TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                              <TableSortLabel active={sortKey === "domain"} direction={sortDirection} onClick={() => handleSort("domain")}>Domain</TableSortLabel>
-                            </TableCell>
-                            <TableCell>
-                              <TableSortLabel active={sortKey === "location"} direction={sortDirection} onClick={() => handleSort("location")}>Location</TableSortLabel>
-                            </TableCell>
-                            <TableCell>Action</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {pagedProjects.map((project, index) => (
-                            <TableRow
-                              key={project.project_id}
-                              hover
-                              sx={{
-                                backgroundColor: index % 2 === 0 ? "#fffdfa" : "#f8f4ee",
+                    {projectView === "list" ? (
+                      <>
+                        <Box sx={{ px: 2.5, py: 2 }}>
+                          <Typography variant="subtitle2" sx={{ color: "#4f5e68" }}>
+                            Showing {filteredProjects.length} projects
+                          </Typography>
+                        </Box>
+                        <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                          <Table stickyHeader size="small">
+                            <TableHead>
+                              <TableRow sx={{
                                 "& .MuiTableCell-root": {
-                                  borderBottom: "1px solid #eadfce",
-                                  color: "#253744",
-                                  fontSize: 13,
-                                  verticalAlign: "top",
+                                  backgroundColor: "#20323f",
+                                  color: "#f8fafc",
+                                  fontWeight: 700,
+                                  letterSpacing: 0.3,
+                                  borderBottom: "2px solid #162732",
+                                  whiteSpace: "nowrap",
                                 },
-                              }}
-                            >
-                              <TableCell>{project.project_id}</TableCell>
-                              <TableCell>{project.project_name}</TableCell>
-                              <TableCell>{(project.required_skills || []).join(", ") || "-"}</TableCell>
-                              <TableCell>{project.required_headcount}</TableCell>
-                              <TableCell>{project.allocated_count}</TableCell>
-                              <TableCell>{project.domain}</TableCell>
-                              <TableCell>{project.location}</TableCell>
-                              <TableCell>
-                                <Button size="small" variant="outlined" onClick={() => handleViewProjectDetails(project.project_id)}>
-                                  View Details
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                    <TablePagination
-                      component="div"
-                      count={filteredProjects.length}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      rowsPerPage={rowsPerPage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                      rowsPerPageOptions={[10, 25, 50, 100]}
-                      sx={{
-                        borderTop: "1px solid #eadfce",
-                        backgroundColor: "#fff9f0",
-                      }}
-                    />
-
-                    {projectLoading && (
-                      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-                        <CircularProgress />
-                      </Box>
-                    )}
-
-                    {selectedProjectDetails?.project && !projectLoading && (
+                                "& .MuiTableSortLabel-root": { color: "#f8fafc" },
+                                "& .MuiTableSortLabel-icon": { color: "#f8fafc !important" },
+                              }}>
+                                <TableCell>Project ID</TableCell>
+                                <TableCell>
+                                  <TableSortLabel active={sortKey === "project_name"} direction={sortDirection} onClick={() => handleSort("project_name")}>Project Name</TableSortLabel>
+                                </TableCell>
+                                <TableCell>Required Skills</TableCell>
+                                <TableCell>
+                                  <TableSortLabel active={sortKey === "required_headcount"} direction={sortDirection} onClick={() => handleSort("required_headcount")}>Headcount</TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                  <TableSortLabel active={sortKey === "allocated_count"} direction={sortDirection} onClick={() => handleSort("allocated_count")}>Allocated</TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                  <TableSortLabel active={sortKey === "domain"} direction={sortDirection} onClick={() => handleSort("domain")}>Domain</TableSortLabel>
+                                </TableCell>
+                                <TableCell>
+                                  <TableSortLabel active={sortKey === "location"} direction={sortDirection} onClick={() => handleSort("location")}>Location</TableSortLabel>
+                                </TableCell>
+                                <TableCell>Action</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {pagedProjects.map((project, index) => (
+                                <TableRow
+                                  key={project.project_id}
+                                  hover
+                                  sx={{
+                                    backgroundColor: index % 2 === 0 ? "#fffdfa" : "#f8f4ee",
+                                    "& .MuiTableCell-root": {
+                                      borderBottom: "1px solid #eadfce",
+                                      color: "#253744",
+                                      fontSize: 13,
+                                      verticalAlign: "top",
+                                    },
+                                  }}
+                                >
+                                  <TableCell>{project.project_id}</TableCell>
+                                  <TableCell>{project.project_name}</TableCell>
+                                  <TableCell>{(project.required_skills || []).join(", ") || "-"}</TableCell>
+                                  <TableCell>{project.required_headcount}</TableCell>
+                                  <TableCell>{project.allocated_count}</TableCell>
+                                  <TableCell>{project.domain}</TableCell>
+                                  <TableCell>{project.location}</TableCell>
+                                  <TableCell>
+                                    <Button size="small" variant="outlined" onClick={() => handleViewProjectDetails(project.project_id)}>
+                                      View Details
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        <TablePagination
+                          component="div"
+                          count={filteredProjects.length}
+                          page={page}
+                          onPageChange={handleChangePage}
+                          rowsPerPage={rowsPerPage}
+                          onRowsPerPageChange={handleChangeRowsPerPage}
+                          rowsPerPageOptions={[10, 25, 50, 100]}
+                          sx={{
+                            borderTop: "1px solid #eadfce",
+                            backgroundColor: "#fff9f0",
+                          }}
+                        />
+                      </>
+                    ) : (
                       <Box sx={{ p: 2.5 }}>
+                        <Box sx={{ mb: 2 }}>
+                          <Button variant="outlined" onClick={handleBackToProjectsList}>
+                            Back to Projects
+                          </Button>
+                        </Box>
+
+                        {projectLoading && (
+                          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                            <CircularProgress />
+                          </Box>
+                        )}
+
+                        {selectedProjectDetails?.project && !projectLoading && (
+                          <>
+                            <Card sx={{ border: "1px solid #d7d0c5", mb: 2 }}>
+                              <CardContent>
+                                <Typography variant="h6" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
+                                  AI Recommendation Chat (Cross-Project)
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: "#5a6f7b", mb: 1.5 }}>
+                                  Ask AI to suggest employees currently allocated to other projects who could be moved here.
+                                </Typography>
+                                <Stack spacing={1.2}>
+                                  <TextField
+                                    fullWidth
+                                    multiline
+                                    minRows={2}
+                                    value={aiPrompt}
+                                    onChange={(event) => setAiPrompt(event.target.value)}
+                                    placeholder="Example: Suggest top 3 employees to move with minimal delivery risk."
+                                  />
+                                  <Box>
+                                    <Button
+                                      variant="contained"
+                                      onClick={handleAskProjectAi}
+                                      disabled={aiLoading}
+                                      sx={{ background: "#334f67" }}
+                                    >
+                                      {aiLoading ? "Generating..." : "Ask AI"}
+                                    </Button>
+                                  </Box>
+
+                                  {aiRecommendation?.answer && (
+                                    <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #d8e2ea", background: "#f7fbff" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f3a51", mb: 0.6 }}>
+                                        AI Response
+                                      </Typography>
+                                      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", color: "#2a3f4e" }}>
+                                        {aiRecommendation.answer}
+                                      </Typography>
+                                    </Box>
+                                  )}
+
+                                  {Array.isArray(aiRecommendation?.suggestions) && aiRecommendation.suggestions.length > 0 && (
+                                    <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #e3ddd3" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
+                                        Suggested Employees From Other Projects
+                                      </Typography>
+                                      <Stack spacing={0.8}>
+                                        {aiRecommendation.suggestions.map((candidate) => (
+                                          <Box key={`cross-${candidate.employee_id}-${candidate.source_project_id}`} sx={{ border: "1px solid #ece7de", borderRadius: 1.2, p: 1 }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                              {candidate.name} ({candidate.employee_id})
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
+                                              Source: {candidate.source_project_name} ({candidate.source_project_id}) | Allocation {candidate.source_allocation_percentage}%
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
+                                              {candidate.primary_skill} / {candidate.secondary_skill} | {candidate.years_experience} years | Utilization {candidate.current_utilization}%
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: "#1f6b75" }}>
+                                              Matched skills: {(candidate.matched_skills || []).join(", ")}
+                                            </Typography>
+                                          </Box>
+                                        ))}
+                                      </Stack>
+                                    </Box>
+                                  )}
+                                </Stack>
+                              </CardContent>
+                            </Card>
+
                         <Card sx={{ border: "1px solid #d7d0c5", mb: 2 }}>
                           <CardContent>
                             <Typography variant="h6" sx={{ fontWeight: 700, color: "#243542" }}>
@@ -657,7 +762,7 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
                                         color="error"
                                         variant="outlined"
                                         onClick={() => handleUnassignEmployee(selectedProjectDetails.project.project_id, member.employee_id)}
-                                        disabled={unassigningEmployeeId === member.employee_id || assigningEmployeeId === member.employee_id}
+                                        disabled={!canManage || unassigningEmployeeId === member.employee_id || assigningEmployeeId === member.employee_id}
                                         sx={{ minWidth: 110 }}
                                       >
                                         {unassigningEmployeeId === member.employee_id ? "Unassigning..." : "Unassign"}
@@ -695,7 +800,7 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
                                         size="small"
                                         variant="contained"
                                         onClick={() => handleAssignEmployee(selectedProjectDetails.project.project_id, candidate.employee_id)}
-                                        disabled={assigningEmployeeId === candidate.employee_id}
+                                        disabled={!canManage || assigningEmployeeId === candidate.employee_id}
                                         sx={{ background: "#1f6b75", minWidth: 110 }}
                                       >
                                         {assigningEmployeeId === candidate.employee_id ? "Assigning..." : "Assign"}
@@ -711,74 +816,8 @@ export default function EmployeesPage({ onBackToDashboard, onLogout }) {
                             )}
                           </CardContent>
                         </Card>
-
-                        <Card sx={{ border: "1px solid #d7d0c5", mt: 2 }}>
-                          <CardContent>
-                            <Typography variant="h6" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
-                              AI Recommendation Chat (Cross-Project)
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: "#5a6f7b", mb: 1.5 }}>
-                              Ask AI to suggest employees currently allocated to other projects who could be moved here.
-                            </Typography>
-                            <Stack spacing={1.2}>
-                              <TextField
-                                fullWidth
-                                multiline
-                                minRows={2}
-                                value={aiPrompt}
-                                onChange={(event) => setAiPrompt(event.target.value)}
-                                placeholder="Example: Suggest top 3 employees to move with minimal delivery risk."
-                              />
-                              <Box>
-                                <Button
-                                  variant="contained"
-                                  onClick={handleAskProjectAi}
-                                  disabled={aiLoading}
-                                  sx={{ background: "#334f67" }}
-                                >
-                                  {aiLoading ? "Generating..." : "Ask AI"}
-                                </Button>
-                              </Box>
-
-                              {aiRecommendation?.answer && (
-                                <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #d8e2ea", background: "#f7fbff" }}>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f3a51", mb: 0.6 }}>
-                                    AI Response
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", color: "#2a3f4e" }}>
-                                    {aiRecommendation.answer}
-                                  </Typography>
-                                </Box>
-                              )}
-
-                              {Array.isArray(aiRecommendation?.suggestions) && aiRecommendation.suggestions.length > 0 && (
-                                <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #e3ddd3" }}>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
-                                    Suggested Employees From Other Projects
-                                  </Typography>
-                                  <Stack spacing={0.8}>
-                                    {aiRecommendation.suggestions.map((candidate) => (
-                                      <Box key={`cross-${candidate.employee_id}-${candidate.source_project_id}`} sx={{ border: "1px solid #ece7de", borderRadius: 1.2, p: 1 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                                          {candidate.name} ({candidate.employee_id})
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
-                                          Source: {candidate.source_project_name} ({candidate.source_project_id}) | Allocation {candidate.source_allocation_percentage}%
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
-                                          {candidate.primary_skill} / {candidate.secondary_skill} | {candidate.years_experience} years | Utilization {candidate.current_utilization}%
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: "#1f6b75" }}>
-                                          Matched skills: {(candidate.matched_skills || []).join(", ")}
-                                        </Typography>
-                                      </Box>
-                                    ))}
-                                  </Stack>
-                                </Box>
-                              )}
-                            </Stack>
-                          </CardContent>
-                        </Card>
+                          </>
+                        )}
                       </Box>
                     )}
                   </>

@@ -76,6 +76,25 @@ Then call protected APIs using:
 Authorization: Bearer <token>
 ```
 
+Role behavior in current UI:
+
+- `admin` and `manager`: full recommendation and project allocation actions.
+- `viewer`: read-only workspace (cannot assign, unassign, or trigger recommendation generation actions).
+
+Core operational endpoints now include:
+
+- `GET /project-teams`
+- `GET /projects`
+- `GET /projects/{project_id}/details`
+- `POST /projects/{project_id}/assign`
+- `POST /projects/{project_id}/unassign`
+- `POST /projects/{project_id}/ai-recommend-chat`
+
+Chat scope guardrails:
+
+- `/chat` and project AI chat support staffing/allocation queries only.
+- Unrelated prompts return HTTP 400 with supported-scope detail.
+
 ## 7. Run Benchmark Automatically
 
 ```bash

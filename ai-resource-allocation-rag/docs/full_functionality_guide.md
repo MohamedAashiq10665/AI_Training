@@ -443,10 +443,15 @@ Two operational tabs:
 
 2. Projects tab
 - searchable, sortable, paginated projects table
-- view project details action
+- view project details opens a dedicated details mode in-page (list -> details)
+- details mode includes a Back to Projects action
+- AI Recommendation Chat (Cross-Project) section appears at the top of details mode
 - allocated members section with Unassign action
 - fit candidates section with Assign action
-- AI Recommendation Chat (Cross-Project) section
+
+Role-aware UI behavior:
+- viewer: read-only experience, assignment actions are disabled
+- manager/admin: full assign/unassign and recommendation interactions
 
 Project actions refresh behavior:
 - assign/unassign triggers data reload (employees + projects)

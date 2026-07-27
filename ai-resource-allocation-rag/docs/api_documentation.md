@@ -38,8 +38,8 @@ Authorization: Bearer <access_token>
 Roles:
 
 - `admin`: all endpoints
-- `manager`: recommendation, bench, analytics, utilization, chat, employees
-- `viewer`: analytics, utilization, chat, employees
+- `manager`: all operational endpoints except admin-only management concerns
+- `viewer`: read-only analytics/workforce endpoints and constrained chat endpoints
 
 ## POST /recommend
 
@@ -76,6 +76,12 @@ Request body:
 
 Returns RAG-grounded answer and source employee IDs.
 
+Validation behavior:
+
+- Chat supports only workforce staffing/allocation queries.
+- Unrelated prompts (for example weather, jokes, general trivia) return HTTP 400.
+- Error detail clearly states the supported scope.
+
 ## GET /employees
 
 Required roles: `admin`, `manager`, `viewer`
@@ -99,3 +105,54 @@ Returns bench population and top bench skills.
 Required roles: `admin`, `manager`, `viewer`
 
 Returns overall utilization, role utilization, historical allocation trend.
+
+## GET /project-teams
+
+Required roles: `admin`, `manager`, `viewer`
+
+Returns latest allocation month grouped by project and member list.
+
+## GET /projects
+
+Required roles: `admin`, `manager`, `viewer`
+
+Returns projects with:
+
+- required skills
+- headcount demand
+- allocated member count (latest month)
+
+## GET /projects/{project_id}/details
+
+Required roles: `admin`, `manager`, `viewer`
+
+Returns:
+
+- project metadata
+- allocated members
+- fit candidates (AI-driven ranking)
+
+Fit candidates include explainability fields such as matched skills, match score, recommendation reason, and missing skills.
+
+## POST /projects/{project_id}/assign
+
+Required roles: `admin`, `manager`
+
+Assigns an employee to a project for current/latest allocation month and updates utilization/availability.
+
+## POST /projects/{project_id}/unassign
+
+Required roles: `admin`, `manager`
+
+Unassigns an employee from a project and recomputes employee utilization from remaining allocations.
+
+## POST /projects/{project_id}/ai-recommend-chat
+
+Required roles: `admin`, `manager`, `viewer`
+
+Returns cross-project transfer suggestions and an AI response narrative.
+
+Validation behavior:
+
+- User-provided query must be staffing/allocation related.
+- Unrelated prompts return HTTP 400 with explicit supported-scope detail.

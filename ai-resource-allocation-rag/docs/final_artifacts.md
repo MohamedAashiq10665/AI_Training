@@ -5,7 +5,9 @@
 - Backend API, services, repositories, database models
 - RAG ingestion, embedding, indexing, retrieval pipeline
 - Recommendation engine
-- Frontend dashboard
+- Project allocation operations (project details, assign, unassign)
+- AI recommendation chat services with staffing-scope guardrails
+- Frontend dashboard and workforce workspace (Employees + Projects)
 - Benchmark runner
 
 ## Data Artifacts
@@ -28,6 +30,7 @@
 - Unit tests
 - Integration tests
 - Performance/retrieval latency test
+- Endpoint workflow validation for project allocation lifecycle and constrained chat
 
 ## Documentation
 

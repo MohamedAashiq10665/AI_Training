@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -25,6 +25,46 @@ analytics_service = AnalyticsService()
 chat_service = ChatService()
 
 
+SUPPORTED_CHAT_REASON = (
+    "This chat recommendation is supported only for workforce staffing and allocation use cases "
+    "(skills, experience, availability, utilization, bench, assignment/unassignment, and project allocation decisions). "
+    "Other topics are not supported."
+)
+
+
+def _ensure_staffing_query(query: str | None) -> None:
+    normalized = str(query or "").strip().lower()
+    if not normalized:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_CHAT_REASON)
+
+    staffing_keywords = {
+        "employee",
+        "employees",
+        "resource",
+        "resources",
+        "staff",
+        "staffing",
+        "allocation",
+        "allocate",
+        "unassign",
+        "assign",
+        "project",
+        "projects",
+        "skill",
+        "skills",
+        "availability",
+        "utilization",
+        "bench",
+        "candidate",
+        "candidates",
+        "role",
+        "roles",
+        "experience",
+    }
+    if not any(keyword in normalized for keyword in staffing_keywords):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_CHAT_REASON)
+
+
 def _parse_multi_value_text(value: str | None) -> list[str]:
     if not value:
         return []
@@ -47,6 +87,7 @@ def chat(
     db: Session = Depends(get_db),
     user=Depends(require_roles(["admin", "manager", "viewer"])),
 ) -> ChatResponse:
+    _ensure_staffing_query(request.query)
     result = chat_service.answer(db, request.query, top_k=request.top_k)
     return ChatResponse(**result)
 
@@ -460,6 +501,8 @@ def project_ai_recommend_chat(
     top_k = int(payload.get("top_k", 5) or 5)
     top_k = max(1, min(top_k, 10))
     query = str(payload.get("query", "")).strip()
+    if query:
+        _ensure_staffing_query(query)
 
     project = db.query(Project).filter(Project.project_id == project_id).first()
     if not project:

@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -30,6 +32,38 @@ SUPPORTED_CHAT_REASON = (
     "(skills, experience, availability, utilization, bench, assignment/unassignment, and project allocation decisions). "
     "Other topics are not supported."
 )
+
+SUPPORTED_RECOMMENDATION_REASON = (
+    "AI staffing recommendations require a list of relevant skills only. "
+    "Enter comma-separated skill names such as Python, Azure, React, Data Engineering, or Power BI."
+)
+
+SKILL_TEXT_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9 .#+&/_-]{0,39}$"
+INVALID_SKILL_TERMS = {
+    "who",
+    "what",
+    "when",
+    "where",
+    "why",
+    "how",
+    "please",
+    "find",
+    "show",
+    "give",
+    "tell",
+    "recommend",
+    "suggest",
+    "need",
+    "want",
+    "employee",
+    "employees",
+    "project",
+    "projects",
+    "allocation",
+    "utilization",
+    "bench",
+    "staffing",
+}
 
 
 def _ensure_staffing_query(query: str | None) -> None:
@@ -71,12 +105,28 @@ def _parse_multi_value_text(value: str | None) -> list[str]:
     return [chunk.strip() for chunk in value.replace(",", ";").split(";") if chunk.strip()]
 
 
+def _ensure_skill_list(skills: list[str] | None) -> None:
+    normalized_skills = [str(skill or "").strip() for skill in skills or [] if str(skill or "").strip()]
+    if not normalized_skills:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_RECOMMENDATION_REASON)
+
+    for skill in normalized_skills:
+        skill_terms = [term for term in skill.lower().replace("/", " ").replace("-", " ").split() if term]
+        if len(skill_terms) > 4:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_RECOMMENDATION_REASON)
+        if any(term in INVALID_SKILL_TERMS for term in skill_terms):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_RECOMMENDATION_REASON)
+        if not re.fullmatch(SKILL_TEXT_PATTERN, skill):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=SUPPORTED_RECOMMENDATION_REASON)
+
+
 @router.post("/recommend", response_model=RecommendationResponse)
 def recommend(
     request: RecommendationRequest,
     db: Session = Depends(get_db),
     user=Depends(require_roles(["admin", "manager"])),
 ) -> RecommendationResponse:
+    _ensure_skill_list(request.required_skills)
     recommendations = recommendation_service.recommend(db, request)
     return RecommendationResponse(project_name=request.project_name, recommendations=recommendations)
 

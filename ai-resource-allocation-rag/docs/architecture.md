@@ -27,10 +27,14 @@
 
 ## Chat Scope Guardrails
 
-- Dashboard chat performs lightweight client-side validation before sending requests.
-- Empty, too-short, and non-staffing prompts are blocked in the UI with guidance.
 - Chat endpoints accept only staffing/allocation-related queries.
 - Out-of-scope prompts return HTTP 400 with a clear supported-scope explanation.
+
+## Recommendation Input Guardrails
+
+- Dashboard recommendation input accepts skill-list style values only.
+- The frontend blocks empty, underspecified, or natural-language recommendation input.
+- The backend `/recommend` endpoint repeats this validation so direct API calls cannot bypass it.
 
 ## Architecture Diagram Description
 

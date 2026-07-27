@@ -81,7 +81,4 @@ export const getProjectAiRecommendations = async (projectId, payload) =>
 export const getRecommendations = async (payload) =>
   (await withAuth(() => api.post("/recommend", payload))).data;
 
-export const askStaffingChat = async (payload) =>
-  (await withAuth(() => api.post("/chat", payload))).data;
-
 export default api;

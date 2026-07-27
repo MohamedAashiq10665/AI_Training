@@ -13,13 +13,12 @@ This project is a production-style MVP that recommends best-fit employees for pr
 - PostgreSQL persistence for runtime APIs
 - FastAPI backend APIs
 - React dashboard with Material UI and Recharts
-- Dashboard AI recommendation chat with staffing-only prompt validation
 - Employees/Projects operational workspace with dedicated project details view
 - Project allocation lifecycle: assign and unassign members
 - AI-driven fit candidates in project details
 - Cross-project AI recommendation chat
 - Chat guardrails that reject non-staffing questions with explicit error messages
-- Frontend chat validation for empty, too-short, and out-of-scope dashboard prompts
+- Frontend and backend validation for AI staffing recommendation skill input
 - Local LLM chat assistant through Ollama
 - Model comparison report (Llama 3 8B vs Phi-3 Mini)
 - Automated model benchmark runner for Ollama models

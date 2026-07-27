@@ -61,6 +61,13 @@ Request body:
 
 Returns ranked employees with match score, reason, matched/missing skills, and upskilling suggestions.
 
+Validation behavior:
+
+- `required_skills` must be a comma-separated or array-style list of skill names.
+- Empty skill lists are rejected.
+- Skill entries shorter than 2 characters are rejected.
+- Natural-language prompts or unrelated non-skill text return HTTP 400 with a skill-format guidance message.
+
 ## POST /chat
 
 Required roles: `admin`, `manager`, `viewer`

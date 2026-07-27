@@ -409,7 +409,7 @@ frontend/src/services/api.js:
 - auto Authorization header management
 - 401 handling clears session
 
-Available API wrappers include auth, analytics, employees, projects, assign/unassign, dashboard staffing chat, project AI recommendation chat, and recommendation calls.
+Available API wrappers include auth, analytics, employees, projects, assign/unassign, project AI recommendation chat, and recommendation calls.
 
 ## 11.3 Login page
 - Pre-filled demo credentials (manager/manager123)
@@ -419,7 +419,6 @@ Available API wrappers include auth, analytics, employees, projects, assign/unas
 ## 11.4 Dashboard page
 Features:
 - AI staffing recommendation panel
-- AI recommendation chat panel for staffing Q&A
 - Workforce KPI cards
 - Bench by Skill chart
 - Historical Allocation Trend chart
@@ -429,16 +428,11 @@ Features:
 Data loading:
 - getAnalytics() + getUtilization()
 
-Dashboard chat behavior:
-- Uses POST /chat through askStaffingChat()
-- Accepts staffing/allocation questions from admin, manager, and viewer roles
-- Applies client-side validation before API submission
-- Shows backend validation errors when server rejects the prompt
-
-Dashboard chat validation rules:
-- empty prompts are rejected locally
-- prompts shorter than a meaningful threshold are rejected locally
-- prompts without staffing/allocation keywords are rejected locally with guidance
+Dashboard recommendation validation:
+- required skills input is validated before POST /recommend is called
+- empty skill lists are rejected locally
+- skills shorter than 2 characters are rejected locally
+- natural-language or non-skill prompts are rejected in both the dashboard and backend API
 
 Visualization:
 - Recharts BarChart and LineChart

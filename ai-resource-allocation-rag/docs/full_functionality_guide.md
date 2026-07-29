@@ -279,6 +279,7 @@ Roles used:
   - builds/uses RAG index
   - retrieves candidates from vector search
   - applies weighted score model
+  - uses LLM to generate concise recommendation rationale text
 
 - ChatService
   - RAG retrieval + LLM answer generation
@@ -341,6 +342,12 @@ In rag/llm/ollama_client.py + backend/services/chat_service.py:
 - non-streaming response with timeout handling
 - answer grounded by retrieved employee snippets
 
+## 9.6 LLM-assisted recommendation rationale
+In backend/services/recommendation_service.py:
+- weighted scoring still determines candidate ranking order
+- Ollama generates `recommendation_reason` for each shortlisted candidate
+- if LLM is unavailable or errors, deterministic fallback reason text is returned
+
 ## 10. API Endpoints and Functional Behavior
 
 ## 10.1 Public health
@@ -353,7 +360,7 @@ In rag/llm/ollama_client.py + backend/services/chat_service.py:
 
 ## 10.3 Recommendation and AI chat
 - POST /recommend (admin, manager)
-  - AI-assisted staffing recommendations with explainable score details.
+  - AI-assisted staffing recommendations with deterministic ranking and LLM-generated rationale.
 - POST /chat (admin, manager, viewer)
   - RAG-grounded natural language workforce Q&A.
 

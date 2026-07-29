@@ -7,6 +7,7 @@ This project is a production-style MVP that recommends best-fit employees for pr
 - Synthetic workforce and project data generation
 - RAG-based employee retrieval with FAISS and local embeddings
 - Explainable staffing recommendations and skill-gap analysis
+- LLM-generated recommendation rationale with deterministic scoring fallback
 - Bench and utilization analytics
 - JWT authentication and role-based access control (RBAC)
 - Role-aware frontend UX (viewer read-only, manager/admin operational actions)

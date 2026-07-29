@@ -8,8 +8,8 @@ Request body:
 
 ```json
 {
-  "username": "manager",
-  "password": "manager123"
+  "username": "<your-username>",
+  "password": "<your-password>"
 }
 ```
 

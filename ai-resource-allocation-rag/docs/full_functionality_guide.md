@@ -412,7 +412,7 @@ frontend/src/services/api.js:
 Available API wrappers include auth, analytics, employees, projects, assign/unassign, project AI recommendation chat, and recommendation calls.
 
 ## 11.3 Login page
-- Pre-filled demo credentials (manager/manager123)
+- Username and password fields are entered by the user at login
 - On success stores JWT and role
 - Error feedback shown with MUI Alert
 

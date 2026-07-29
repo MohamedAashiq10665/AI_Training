@@ -54,20 +54,20 @@ Service URLs:
 
 ## 5. Default Users
 
-Seeded users are created automatically:
+Seeded users are created automatically for the core roles:
 
-- `admin / admin123`
-- `manager / manager123`
-- `viewer / viewer123`
+- `admin`
+- `manager`
+- `viewer`
 
-Use `POST /auth/login` to get a Bearer token.
+Use `POST /auth/login` with your configured credentials to get a Bearer token.
 
 ## 6. Auth Flow Example
 
 ```bash
 curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"manager","password":"manager123"}'
+  -d '{"username":"<your-username>","password":"<your-password>"}'
 ```
 
 Then call protected APIs using:

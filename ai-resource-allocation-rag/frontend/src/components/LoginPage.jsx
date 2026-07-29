@@ -12,8 +12,8 @@ import {
 import { login } from "../services/api";
 
 export default function LoginPage({ onLoginSuccess }) {
-  const [username, setUsername] = useState("manager");
-  const [password, setPassword] = useState("manager123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -82,10 +82,6 @@ export default function LoginPage({ onLoginSuccess }) {
                 {loading ? "Signing In..." : "Sign In"}
               </Button>
             </Box>
-
-            <Typography variant="caption" sx={{ mt: 2, display: "block", color: "#6f7d86" }}>
-              Demo credentials: manager / manager123
-            </Typography>
           </CardContent>
         </Card>
       </Container>

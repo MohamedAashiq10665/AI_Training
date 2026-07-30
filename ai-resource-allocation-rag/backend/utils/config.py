@@ -18,6 +18,10 @@ class Settings(BaseSettings):
 
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3:8b"
+    recommendation_prompt_strategy: str = "few_shot"
+    recommendation_llm_rerank_enabled: bool = True
+    recommendation_llm_rerank_alpha: float = 0.7
+    recommendation_llm_rerank_top_n: int = 20
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     api_host: str = "0.0.0.0"

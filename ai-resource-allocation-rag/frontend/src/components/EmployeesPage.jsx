@@ -29,8 +29,9 @@ import {
 } from "@mui/material";
 import {
   assignEmployeeToProject,
+  confirmIntentAssignProposal,
+  createIntentAssignProposal,
   getEmployees,
-  getProjectAiRecommendations,
   getProjectDetails,
   getProjects,
   unassignEmployeeFromProject,
@@ -83,9 +84,11 @@ export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
   const [projectLoading, setProjectLoading] = useState(false);
   const [assigningEmployeeId, setAssigningEmployeeId] = useState("");
   const [unassigningEmployeeId, setUnassigningEmployeeId] = useState("");
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiRecommendation, setAiRecommendation] = useState(null);
+  const [intentPrompt, setIntentPrompt] = useState("");
+  const [intentLoading, setIntentLoading] = useState(false);
+  const [intentProposal, setIntentProposal] = useState(null);
+  const [intentError, setIntentError] = useState("");
+  const [intentConfirmLoading, setIntentConfirmLoading] = useState(false);
   const isViewer = role === "viewer";
   const canManage = role === "admin" || role === "manager";
 
@@ -200,11 +203,14 @@ export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
   };
 
   const handleViewProjectDetails = async (projectId) => {
+    setProjectView("details");
     setProjectLoading(true);
     setError("");
     setSuccess("");
-    setAiRecommendation(null);
-    setAiPrompt("");
+    setSelectedProjectDetails(null);
+    setIntentProposal(null);
+    setIntentError("");
+    setIntentPrompt("");
     try {
       const details = await getProjectDetails(projectId);
       if (details?.detail === "Project not found") {
@@ -212,11 +218,11 @@ export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
         setSelectedProjectDetails(null);
       } else {
         setSelectedProjectDetails(details);
-        setProjectView("details");
       }
     } catch (err) {
       const message = err?.response?.data?.detail || err?.message || "Failed to load project details.";
       setError(message);
+      setProjectView("list");
     } finally {
       setProjectLoading(false);
     }
@@ -273,34 +279,71 @@ export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
     }
   };
 
-  const handleAskProjectAi = async () => {
+  const handleIntentProposal = async () => {
     const projectId = selectedProjectDetails?.project?.project_id;
     if (!projectId) {
       return;
     }
 
-    setAiLoading(true);
+    setIntentLoading(true);
     setError("");
+    setIntentError("");
     try {
-      const response = await getProjectAiRecommendations(projectId, {
-        query: aiPrompt,
-        top_k: 5,
+      const response = await createIntentAssignProposal(projectId, {
+        query: intentPrompt,
+        allocation_percentage: 100,
       });
-      setAiRecommendation(response);
+      setIntentProposal(response);
     } catch (err) {
-      const message = err?.response?.data?.detail || err?.message || "Failed to fetch AI recommendations.";
-      setError(message);
+      const message = err?.response?.data?.detail || err?.message || "Failed to generate intent assignment proposal.";
+      setIntentError(message);
     } finally {
-      setAiLoading(false);
+      setIntentLoading(false);
+    }
+  };
+
+  const handleIntentConfirm = async (decision) => {
+    const projectId = selectedProjectDetails?.project?.project_id;
+    const proposalId = intentProposal?.proposal_id;
+    if (!projectId || !proposalId) {
+      return;
+    }
+
+    setIntentConfirmLoading(true);
+    setError("");
+    setIntentError("");
+    try {
+      const response = await confirmIntentAssignProposal(projectId, {
+        proposal_id: proposalId,
+        confirm: decision,
+      });
+
+      if (response?.status === "completed") {
+        setSuccess(`Intent assignment completed: assigned ${response.assigned_count}, already allocated ${response.already_allocated_count}, failed ${response.failed_count}.`);
+        setIntentProposal(null);
+        setIntentPrompt("");
+        await loadEmployeesAndProjects();
+        const details = await getProjectDetails(projectId);
+        setSelectedProjectDetails(details);
+      } else {
+        setSuccess("Intent assignment cancelled.");
+        setIntentProposal(null);
+      }
+    } catch (err) {
+      const message = err?.response?.data?.detail || err?.message || "Failed to confirm intent assignment.";
+      setIntentError(message);
+    } finally {
+      setIntentConfirmLoading(false);
     }
   };
 
   const handleBackToProjectsList = () => {
     setProjectView("list");
     setProjectLoading(false);
-    setAiLoading(false);
-    setAiRecommendation(null);
-    setAiPrompt("");
+    setIntentLoading(false);
+    setIntentProposal(null);
+    setIntentError("");
+    setIntentPrompt("");
   };
 
   useEffect(() => {
@@ -659,64 +702,110 @@ export default function EmployeesPage({ role, onBackToDashboard, onLogout }) {
                             <Card sx={{ border: "1px solid #d7d0c5", mb: 2 }}>
                               <CardContent>
                                 <Typography variant="h6" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
-                                  AI Recommendation Chat (Cross-Project)
+                                  Intent Driven Driver
                                 </Typography>
                                 <Typography variant="body2" sx={{ color: "#5a6f7b", mb: 1.5 }}>
-                                  Ask AI to suggest employees currently allocated to other projects who could be moved here.
+                                  Provide a staffing intent for this selected project. The system validates criteria, proposes employees, then asks for confirmation before assignment.
                                 </Typography>
                                 <Stack spacing={1.2}>
                                   <TextField
                                     fullWidth
                                     multiline
                                     minRows={2}
-                                    value={aiPrompt}
-                                    onChange={(event) => setAiPrompt(event.target.value)}
-                                    placeholder="Example: Suggest top 3 employees to move with minimal delivery risk."
+                                    value={intentPrompt}
+                                    onChange={(event) => setIntentPrompt(event.target.value)}
+                                    placeholder="Example: Plan to allocate resources for this project; suggest 3 candidates validating skill, experience, certification, and availability."
+                                    disabled={!canManage}
                                   />
                                   <Box>
                                     <Button
                                       variant="contained"
-                                      onClick={handleAskProjectAi}
-                                      disabled={aiLoading}
+                                      onClick={handleIntentProposal}
+                                      disabled={intentLoading || !canManage}
                                       sx={{ background: "#334f67" }}
                                     >
-                                      {aiLoading ? "Generating..." : "Ask AI"}
+                                      {intentLoading ? "Generating Proposal..." : "Generate Proposal"}
                                     </Button>
                                   </Box>
 
-                                  {aiRecommendation?.answer && (
+                                  {intentError && (
+                                    <Alert severity="error">
+                                      {intentError}
+                                    </Alert>
+                                  )}
+
+                                  {intentProposal?.message && (
                                     <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #d8e2ea", background: "#f7fbff" }}>
                                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1f3a51", mb: 0.6 }}>
-                                        AI Response
+                                        Proposal Status
                                       </Typography>
                                       <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", color: "#2a3f4e" }}>
-                                        {aiRecommendation.answer}
+                                        {intentProposal.message}
                                       </Typography>
                                     </Box>
                                   )}
 
-                                  {Array.isArray(aiRecommendation?.suggestions) && aiRecommendation.suggestions.length > 0 && (
+                                  {intentProposal?.validation_summary && (
                                     <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #e3ddd3" }}>
                                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
-                                        Suggested Employees From Other Projects
+                                        Validation Context Summary
+                                      </Typography>
+                                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                        <Chip size="small" label={`Suggested: ${intentProposal.validation_summary.suggested_count}`} />
+                                        <Chip size="small" color="success" label={`Skill Matched: ${intentProposal.validation_summary.skill_matched_count}`} />
+                                        <Chip size="small" color="success" label={`Experience Matched: ${intentProposal.validation_summary.experience_matched_count}`} />
+                                        <Chip size="small" color="success" label={`Certification Matched: ${intentProposal.validation_summary.certification_matched_count}`} />
+                                        <Chip size="small" color="success" label={`Availability Matched: ${intentProposal.validation_summary.availability_matched_count}`} />
+                                      </Stack>
+                                      <Typography variant="caption" sx={{ display: "block", mt: 1, color: "#60727d" }}>
+                                        Criteria used: skills {(intentProposal.normalized_criteria?.required_skills || []).join(", ") || "-"}, min exp {intentProposal.normalized_criteria?.min_experience ?? 0} years.
+                                      </Typography>
+                                    </Box>
+                                  )}
+
+                                  {Array.isArray(intentProposal?.suggestions) && intentProposal.suggestions.length > 0 && (
+                                    <Box sx={{ p: 1.5, borderRadius: 1.5, border: "1px solid #e3ddd3" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#243542", mb: 1 }}>
+                                        Proposed Employees For Assignment
                                       </Typography>
                                       <Stack spacing={0.8}>
-                                        {aiRecommendation.suggestions.map((candidate) => (
-                                          <Box key={`cross-${candidate.employee_id}-${candidate.source_project_id}`} sx={{ border: "1px solid #ece7de", borderRadius: 1.2, p: 1 }}>
+                                        {intentProposal.suggestions.map((candidate) => (
+                                          <Box key={`intent-${candidate.employee_id}`} sx={{ border: "1px solid #ece7de", borderRadius: 1.2, p: 1 }}>
                                             <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                                              {candidate.name} ({candidate.employee_id})
+                                              {candidate.employee_name} ({candidate.employee_id})
                                             </Typography>
                                             <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
-                                              Source: {candidate.source_project_name} ({candidate.source_project_id}) | Allocation {candidate.source_allocation_percentage}%
+                                              Match Score: {candidate.match_score} | Availability: {candidate.availability}
                                             </Typography>
                                             <Typography variant="caption" sx={{ color: "#60727d", display: "block" }}>
-                                              {candidate.primary_skill} / {candidate.secondary_skill} | {candidate.years_experience} years | Utilization {candidate.current_utilization}%
+                                              Experience Fit: {Math.round((Number(candidate?.component_scores?.experience) || 0) * 100)}% | Certification Fit: {Math.round((Number(candidate?.component_scores?.certifications) || 0) * 100)}% | Availability Fit: {Math.round((Number(candidate?.component_scores?.availability) || 0) * 100)}%
                                             </Typography>
                                             <Typography variant="caption" sx={{ color: "#1f6b75" }}>
-                                              Matched skills: {(candidate.matched_skills || []).join(", ")}
+                                              Matched skills: {(candidate.skills_matched || []).join(", ") || "-"}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: "#a26511", display: "block" }}>
+                                              Missing skills: {(candidate.missing_skills || []).join(", ") || "None"}
                                             </Typography>
                                           </Box>
                                         ))}
+                                      </Stack>
+                                      <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+                                        <Button
+                                          variant="contained"
+                                          color="success"
+                                          onClick={() => handleIntentConfirm("yes")}
+                                          disabled={intentConfirmLoading || !canManage}
+                                        >
+                                          {intentConfirmLoading ? "Applying..." : "Yes, Assign Proposed Employees"}
+                                        </Button>
+                                        <Button
+                                          variant="outlined"
+                                          color="inherit"
+                                          onClick={() => handleIntentConfirm("no")}
+                                          disabled={intentConfirmLoading || !canManage}
+                                        >
+                                          No, Cancel
+                                        </Button>
                                       </Stack>
                                     </Box>
                                   )}

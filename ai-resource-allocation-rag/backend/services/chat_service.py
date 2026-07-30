@@ -30,6 +30,20 @@ class ChatService:
             "resume_text": employee.resume_text,
         }
 
+    @staticmethod
+    def _fallback_answer(candidates: list[dict]) -> str:
+        if not candidates:
+            return "No strong staffing candidates found from current context."
+
+        top = candidates[:3]
+        bullets = []
+        for item in top:
+            metadata = item.get("metadata", {})
+            employee_id = metadata.get("employee_id")
+            snippet = str(item.get("text", "")).replace("\n", " ").strip()[:120]
+            bullets.append(f"{employee_id}: {snippet}")
+        return "Quick staffing summary (fallback): " + " | ".join(bullets)
+
     def answer(self, db: Session, query: str, top_k: int = 5) -> dict:
         if not Path("data/employees.index").exists() or not Path("data/employees_meta.json").exists():
             employees = EmployeeRepository(db).all()
@@ -48,7 +62,10 @@ class ChatService:
             f"\nQuery: {query}\nContext:\n{context}\n"
             "Return concise recommendations with reasoning and skill gaps."
         )
-        answer = self.llm.generate(prompt)
+        try:
+            answer = self.llm.generate(prompt, timeout_seconds=12.0)
+        except Exception:
+            answer = self._fallback_answer(candidates)
         return {
             "answer": answer,
             "sources": [str(c["metadata"].get("employee_id")) for c in candidates],

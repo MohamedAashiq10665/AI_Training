@@ -1,7 +1,12 @@
 import axios from "axios";
 
+const defaultApiBaseUrl =
+  typeof window !== "undefined"
+    ? `http://${window.location.hostname}:8000`
+    : "http://localhost:8000";
+
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_BASE_URL || defaultApiBaseUrl,
 });
 
 const TOKEN_KEY = "resource_ai_access_token";
@@ -77,6 +82,12 @@ export const unassignEmployeeFromProject = async (projectId, payload) =>
   (await withAuth(() => api.post(`/projects/${projectId}/unassign`, payload))).data;
 export const getProjectAiRecommendations = async (projectId, payload) =>
   (await withAuth(() => api.post(`/projects/${projectId}/ai-recommend-chat`, payload))).data;
+
+export const createIntentAssignProposal = async (projectId, payload) =>
+  (await withAuth(() => api.post(`/projects/${projectId}/intent-driver/propose`, payload))).data;
+
+export const confirmIntentAssignProposal = async (projectId, payload) =>
+  (await withAuth(() => api.post(`/projects/${projectId}/intent-driver/confirm`, payload))).data;
 
 export const getRecommendations = async (payload) =>
   (await withAuth(() => api.post("/recommend", payload))).data;

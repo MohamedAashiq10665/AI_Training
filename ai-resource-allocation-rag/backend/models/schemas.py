@@ -27,20 +27,42 @@ class RecommendationRequest(BaseModel):
     domain: Optional[str] = None
 
 
+class RecommendationComponentScores(BaseModel):
+    skill_match: float
+    availability: float
+    certifications: float
+    experience: float
+    historical_performance: float
+
+
 class RecommendationItem(BaseModel):
     employee_id: str
     employee_name: str
     match_score: float
+    base_match_score: Optional[float] = None
+    llm_score: Optional[float] = None
+    final_score: Optional[float] = None
+    role: Optional[str] = None
+    primary_skill: Optional[str] = None
+    secondary_skill: Optional[str] = None
+    years_experience: Optional[int] = None
+    certifications: Optional[str] = None
+    latest_project_name: Optional[str] = None
+    latest_project_domain: Optional[str] = None
     recommendation_reason: str
     skills_matched: List[str]
     missing_skills: List[str]
     availability: str
     upskilling_suggestions: List[str]
+    component_scores: RecommendationComponentScores
 
 
 class RecommendationResponse(BaseModel):
     project_name: str
     recommendations: List[RecommendationItem]
+    requested_count: int = 0
+    returned_count: int = 0
+    retrieval_notice: Optional[str] = None
 
 
 class ChatRequest(BaseModel):

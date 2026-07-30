@@ -1,0 +1,52 @@
+{
+  "hash": "040a86ac",
+  "configHash": "3244163b",
+  "lockfileHash": "b7d46e87",
+  "browserHash": "22ef31ff",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "6c2a707b",
+      "needsInterop": true
+    },
+    "@mui/material": {
+      "src": "../../node_modules/@mui/material/esm/index.js",
+      "file": "@mui_material.js",
+      "fileHash": "21bd3df3",
+      "needsInterop": false
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "348d289c",
+      "needsInterop": true
+    },
+    "axios": {
+      "src": "../../node_modules/axios/index.js",
+      "file": "axios.js",
+      "fileHash": "26ffd9ed",
+      "needsInterop": false
+    },
+    "recharts": {
+      "src": "../../node_modules/recharts/es6/index.js",
+      "file": "recharts.js",
+      "fileHash": "0b67b260",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-7PRUFMYM": {
+      "file": "chunk-7PRUFMYM.js"
+    },
+    "chunk-RDMB2FCJ": {
+      "file": "chunk-RDMB2FCJ.js"
+    },
+    "chunk-IGNIO7M7": {
+      "file": "chunk-IGNIO7M7.js"
+    },
+    "chunk-PX6F3LHL": {
+      "file": "chunk-PX6F3LHL.js"
+    }
+  }
+}

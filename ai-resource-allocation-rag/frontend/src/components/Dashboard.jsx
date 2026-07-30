@@ -13,6 +13,10 @@ import {
   Chip,
   Stack,
   Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import {
   BarChart,
@@ -28,9 +32,17 @@ import {
 import { getAnalytics, getRecommendations, getUtilization } from "../services/api";
 
 const AXIS_TICK = { fontSize: 12, fill: "#4c6370" };
-const SKILL_FORMAT_HINT =
-  "Enter comma-separated skill names only, such as Python, Azure, React, Data Engineering, or Power BI.";
+const SKILL_FORMAT_HINT = "Enter comma-separated skills only, such as Python, Azure, React, Data Engineering, or Power BI.";
+const INTENT_FORMAT_HINT =
+  "Use a staffing sentence, for example: Suggest 2 Azure engineers with minimum 3 years experience.";
 const INVALID_SKILL_TERMS = new Set([
+  "hi",
+  "hello",
+  "hey",
+  "happy",
+  "birthday",
+  "thanks",
+  "thank",
   "who",
   "what",
   "when",
@@ -122,7 +134,76 @@ const metricCard = (title, value) => (
 
 const parseSkills = (value) => value.split(",").map((skill) => skill.trim()).filter(Boolean);
 
-const validateRequiredSkills = (value) => {
+const componentChipColor = (score) => {
+  if (score >= 0.75) return "success";
+  if (score >= 0.5) return "warning";
+  return "error";
+};
+
+const componentPercent = (score) => `${Math.round((Number(score) || 0) * 100)}%`;
+
+const looksLikeNaturalLanguageIntent = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized || normalized.includes(",")) return false;
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length;
+  if (wordCount < 4) return false;
+  return /(assign|allocate|need|require|staff|recommend|find|experience|years?|resources?|engineers?)/.test(normalized);
+};
+
+const extractDomainFromIntent = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return null;
+  const domainAliases = {
+    healthcare: "Healthcare",
+    finance: "Finance",
+    retail: "Retail",
+    "public sector": "Public Sector",
+    telecom: "Telecom",
+  };
+  for (const [token, canonical] of Object.entries(domainAliases)) {
+    const pattern = new RegExp(`(?<!\\w)${token.replace(" ", "\\s+")}(?!\\w)`, "i");
+    if (pattern.test(normalized)) {
+      return canonical;
+    }
+  }
+  return null;
+};
+
+const extractRequestedCountFromIntent = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return null;
+
+  let match = normalized.match(/\b(assign|allocate|need|require|staff|find|recommend|suggest)\s+(\d{1,2})\b/);
+  if (!match) {
+    match = normalized.match(/\b(\d{1,2})\s+(engineers?|developers?|resources?|people|staff|candidates?)\b/);
+  }
+  if (!match) {
+    match = normalized.match(/\b(\d{1,2})\s+(?:[a-z0-9.+#&/_-]+\s+){0,4}(engineers?|developers?|resources?|people|staff|candidates?)\b/);
+  }
+  if (!match) return null;
+
+  const parsed = Number(match[2] || match[1]);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.max(1, parsed);
+};
+
+const validateRequiredSkills = (value, inputMode) => {
+  const normalized = String(value || "").trim();
+  if (!normalized) {
+    return "Enter at least one required skill or staffing sentence before requesting recommendations.";
+  }
+
+  if (normalized.length > 200) {
+    return "Keep the recommendation input under 200 characters.";
+  }
+
+  if (inputMode === "intent") {
+    if (!looksLikeNaturalLanguageIntent(normalized)) {
+      return INTENT_FORMAT_HINT;
+    }
+    return "";
+  }
+
   const parsedSkills = parseSkills(value);
 
   if (parsedSkills.length === 0) {
@@ -178,10 +259,15 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
   const [utilization, setUtilization] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [skills, setSkills] = useState("Python,Azure");
+  const [recommendationInputMode, setRecommendationInputMode] = useState("skills");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recommendLoading, setRecommendLoading] = useState(false);
   const [recommendationError, setRecommendationError] = useState("");
+  const [recommendationNotice, setRecommendationNotice] = useState("");
+  const [requestedCount, setRequestedCount] = useState(0);
+  const [returnedCount, setReturnedCount] = useState(0);
+  const [activeDomainCriterion, setActiveDomainCriterion] = useState("");
   const isViewer = role === "viewer";
   const canManage = role === "admin" || role === "manager";
 
@@ -228,34 +314,112 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
       .slice(0, 6);
   }, [analytics]);
 
+  const recommendationSummary = useMemo(() => {
+    const total = recommendations.length;
+    if (!total) {
+      return {
+        total: 0,
+        skillMatched: 0,
+        experienceQualified: 0,
+        certificationMatched: 0,
+        availabilityQualified: 0,
+        domainMatched: 0,
+        fullyQualified: 0,
+      };
+    }
+
+    const skillMatched = recommendations.filter((item) => (item?.missing_skills || []).length === 0).length;
+    const experienceQualified = recommendations.filter((item) => Number(item?.component_scores?.experience || 0) >= 1).length;
+    const certificationMatched = recommendations.filter((item) => Number(item?.component_scores?.certifications || 0) > 0).length;
+    const availabilityQualified = recommendations.filter((item) => Number(item?.component_scores?.availability || 0) >= 1).length;
+    const domainMatched = activeDomainCriterion
+      ? recommendations.filter(
+          (item) =>
+            String(item?.latest_project_domain || "").trim().toLowerCase() ===
+            String(activeDomainCriterion || "").trim().toLowerCase()
+        ).length
+      : 0;
+    const fullyQualified = recommendations.filter((item) => {
+      const noMissingSkills = (item?.missing_skills || []).length === 0;
+      const experienceOk = Number(item?.component_scores?.experience || 0) >= 1;
+      const certOk = Number(item?.component_scores?.certifications || 0) > 0;
+      const availabilityOk = Number(item?.component_scores?.availability || 0) >= 1;
+      return noMissingSkills && experienceOk && certOk && availabilityOk;
+    }).length;
+
+    return {
+      total,
+      skillMatched,
+      experienceQualified,
+      certificationMatched,
+      availabilityQualified,
+      domainMatched,
+      fullyQualified,
+    };
+  }, [recommendations, activeDomainCriterion]);
+
   const runRecommendation = async () => {
     if (!canManage) {
       setError("Recommendation generation is available only for admin and manager roles.");
       return;
     }
 
-    const validationError = validateRequiredSkills(skills);
+    const normalizedInput = String(skills || "").trim();
+    const effectiveInputMode =
+      recommendationInputMode === "intent" || looksLikeNaturalLanguageIntent(normalizedInput)
+        ? "intent"
+        : "skills";
+
+    const validationError = validateRequiredSkills(normalizedInput, effectiveInputMode);
     if (validationError) {
       setRecommendationError(validationError);
       setRecommendations([]);
+      setRecommendationNotice("");
+      setRequestedCount(0);
+      setReturnedCount(0);
+      setActiveDomainCriterion("");
       return;
     }
 
     const payload = {
       project_name: "Healthcare Modernization",
-      required_skills: parseSkills(skills),
+      required_skills: effectiveInputMode === "intent" ? [normalizedInput] : parseSkills(normalizedInput),
       preferred_certifications: ["Azure-AZ900"],
-      min_experience: 4,
-      required_count: 3,
-      location: "Remote",
-      domain: "Healthcare",
+      min_experience: effectiveInputMode === "intent" ? 0 : 4,
+      required_count: 10,
+      location: effectiveInputMode === "intent" ? null : "Remote",
+      domain: effectiveInputMode === "intent" ? null : "Healthcare",
     };
+    const expectedRequestedCount =
+      effectiveInputMode === "intent"
+        ? extractRequestedCountFromIntent(normalizedInput) ?? payload.required_count
+        : payload.required_count;
+    const effectiveDomainCriterion = effectiveInputMode === "intent"
+      ? extractDomainFromIntent(normalizedInput)
+      : payload.domain;
+
     setRecommendLoading(true);
     setError("");
     setRecommendationError("");
+    setRecommendationNotice("");
+    setRequestedCount(expectedRequestedCount);
+    setReturnedCount(0);
+    setActiveDomainCriterion(effectiveDomainCriterion || "");
     try {
       const data = await getRecommendations(payload);
-      setRecommendations(data.recommendations || []);
+      const receivedRecommendations = data?.recommendations || [];
+      const intentRequestedCount = effectiveInputMode === "intent" ? extractRequestedCountFromIntent(normalizedInput) : null;
+      const effectiveRequestedCount = Number(data?.requested_count ?? intentRequestedCount ?? payload.required_count ?? 0) || 0;
+      const effectiveReturnedCount = Number(data?.returned_count ?? receivedRecommendations.length ?? 0) || 0;
+      const fallbackNotice =
+        effectiveRequestedCount > 0 && effectiveReturnedCount < effectiveRequestedCount
+          ? `Only ${effectiveReturnedCount} recommendation(s) were retrieved. We could not find enough candidates to satisfy the requested ${effectiveRequestedCount}.`
+          : "";
+
+      setRecommendations(receivedRecommendations);
+  setRequestedCount(effectiveRequestedCount > 0 ? effectiveRequestedCount : expectedRequestedCount);
+      setReturnedCount(effectiveReturnedCount);
+      setRecommendationNotice(data?.retrieval_notice || fallbackNotice);
     } catch (err) {
       const message = err?.response?.data?.detail || err?.message || "Failed to generate recommendation.";
       setError(message);
@@ -314,10 +478,28 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
                   </Alert>
                 )}
                 {recommendationError && <Alert severity="error" sx={{ mb: 2 }}>{recommendationError}</Alert>}
+                {recommendationNotice && <Alert severity="info" sx={{ mb: 2 }}>{recommendationNotice}</Alert>}
                 <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                  <FormControl sx={{ minWidth: { xs: "100%", sm: 250 } }} disabled={!canManage}>
+                    <InputLabel id="recommendation-input-mode-label">Recommendation Mode</InputLabel>
+                    <Select
+                      labelId="recommendation-input-mode-label"
+                      value={recommendationInputMode}
+                      label="Recommendation Mode"
+                      onChange={(e) => {
+                        const nextMode = e.target.value;
+                        setRecommendationInputMode(nextMode);
+                        setSkills(nextMode === "intent" ? "Suggest 2 Azure engineers with minimum 3 years experience" : "Python,Azure");
+                        setRecommendationError("");
+                      }}
+                    >
+                      <MenuItem value="skills">Skill List Mode</MenuItem>
+                      <MenuItem value="intent">Natural Language Mode</MenuItem>
+                    </Select>
+                  </FormControl>
                   <TextField
                     fullWidth
-                    label="Required Skills (comma separated)"
+                    label={recommendationInputMode === "intent" ? "Staffing Request" : "Required Skills (comma separated)"}
                     value={skills}
                     onChange={(e) => {
                       setSkills(e.target.value);
@@ -325,7 +507,7 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
                         setRecommendationError("");
                       }
                     }}
-                    helperText={SKILL_FORMAT_HINT}
+                    helperText={recommendationInputMode === "intent" ? INTENT_FORMAT_HINT : SKILL_FORMAT_HINT}
                     disabled={!canManage}
                   />
                   <Button variant="contained" onClick={runRecommendation} sx={{ background: "#1f6b75", minWidth: 150 }} disabled={recommendLoading || !canManage}>
@@ -337,13 +519,62 @@ export default function Dashboard({ role, onLogout, onShowEmployees }) {
                     No recommendations yet. Enter skills and click Recommend.
                   </Typography>
                 )}
+                {recommendations.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ color: "#40535f", mb: 1, fontWeight: 700 }}>
+                      Recommendation Coverage Summary
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      <Chip size="small" label={`Requested: ${requestedCount > 0 ? requestedCount : "-"}`} />
+                      <Chip size="small" label={`Returned: ${returnedCount > 0 ? returnedCount : recommendationSummary.total}`} />
+                      <Chip size="small" color="success" label={`Skill Match: ${recommendationSummary.skillMatched}`} />
+                      <Chip size="small" color="success" label={`Experience Qualified: ${recommendationSummary.experienceQualified}`} />
+                      <Chip size="small" color="success" label={`Certification Match: ${recommendationSummary.certificationMatched}`} />
+                      <Chip size="small" color="success" label={`Availability Qualified: ${recommendationSummary.availabilityQualified}`} />
+                      <Chip
+                        size="small"
+                        color={activeDomainCriterion ? "success" : "default"}
+                        label={
+                          activeDomainCriterion
+                            ? `Domain Match (${activeDomainCriterion}): ${recommendationSummary.domainMatched}`
+                            : "Domain Match: N/A"
+                        }
+                      />
+                      <Chip size="small" color="primary" label={`Fully Qualified: ${recommendationSummary.fullyQualified}`} />
+                    </Stack>
+                  </Box>
+                )}
                 {recommendations.map((r) => (
                   <Box key={r.employee_id} sx={{ p: 2, border: "1px solid #e5ddd2", borderRadius: 2, mb: 1.5 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                       {r.employee_name} ({r.employee_id}) - {r.match_score}
                     </Typography>
+                    <Typography variant="body2" sx={{ color: "#5f6f7a", mb: 0.7 }}>
+                      Role: {r.role || "-"} | Primary Skill: {r.primary_skill || "-"} | Secondary Skill: {r.secondary_skill || "-"}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#5f6f7a", mb: 0.7 }}>
+                      Experience: {Number.isFinite(Number(r.years_experience)) ? `${r.years_experience} years` : "-"} | Certifications: {r.certifications || "-"}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#5f6f7a", mb: 1 }}>
+                      Latest Project: {r.latest_project_name || "-"} | Domain: {r.latest_project_domain || "-"}
+                    </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>{r.recommendation_reason}</Typography>
                     <Chip label={`Availability: ${r.availability}`} sx={{ mr: 1, mb: 1 }} />
+                    <Chip
+                      color={componentChipColor(r?.component_scores?.experience)}
+                      label={`Experience Fit: ${componentPercent(r?.component_scores?.experience)}`}
+                      sx={{ mr: 1, mb: 1 }}
+                    />
+                    <Chip
+                      color={componentChipColor(r?.component_scores?.certifications)}
+                      label={`Certification Fit: ${componentPercent(r?.component_scores?.certifications)}`}
+                      sx={{ mr: 1, mb: 1 }}
+                    />
+                    <Chip
+                      color={componentChipColor(r?.component_scores?.availability)}
+                      label={`Availability Fit: ${componentPercent(r?.component_scores?.availability)}`}
+                      sx={{ mr: 1, mb: 1 }}
+                    />
                     {r.skills_matched?.map((s) => (
                       <Chip key={`${r.employee_id}-${s}`} color="success" label={`Matched: ${s}`} sx={{ mr: 1, mb: 1 }} />
                     ))}

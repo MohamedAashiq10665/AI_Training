@@ -300,11 +300,11 @@
     }
   },
   {
-    "text": "employee id: emp0031. name: rebecca henderson. primary skill: machine learning. secondary skill: spring. experience: 10 years. certifications: aws-sa;pmp;scrummaster. availability: available. utilization: 0.58. role: cloud engineer. location: london. resume: 10 years working with machine learning and spring, delivered projects in retail domain.",
+    "text": "employee id: emp0031. name: rebecca henderson. primary skill: machine learning. secondary skill: spring. experience: 10 years. certifications: aws-sa;pmp;scrummaster. availability: allocated. utilization: 1.0. role: cloud engineer. location: london. resume: 10 years working with machine learning and spring, delivered projects in retail domain.",
     "metadata": {
       "employee_id": "EMP0031",
       "primary_skill": "Machine Learning",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 10,
       "role": "Cloud Engineer"
     }
@@ -840,21 +840,21 @@
     }
   },
   {
-    "text": "employee id: emp0085. name: zachary ferrell. primary skill: azure. secondary skill: docker. experience: 11 years. certifications: azure-az900. availability: available. utilization: 0.55. role: software engineer. location: dubai. resume: 11 years working with azure and docker, delivered projects in telecom domain.",
+    "text": "employee id: emp0085. name: zachary ferrell. primary skill: azure. secondary skill: docker. experience: 11 years. certifications: azure-az900. availability: allocated. utilization: 1.0. role: software engineer. location: dubai. resume: 11 years working with azure and docker, delivered projects in telecom domain.",
     "metadata": {
       "employee_id": "EMP0085",
       "primary_skill": "Azure",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 11,
       "role": "Software Engineer"
     }
   },
   {
-    "text": "employee id: emp0086. name: daniel baker. primary skill: devops. secondary skill: node.js. experience: 10 years. certifications: gcp-ace;aws-sa. availability: available. utilization: 0.71. role: ml engineer. location: remote. resume: 10 years working with devops and node.js, delivered projects in healthcare domain.",
+    "text": "employee id: emp0086. name: daniel baker. primary skill: devops. secondary skill: node.js. experience: 10 years. certifications: gcp-ace;aws-sa. availability: allocated. utilization: 1.0. role: ml engineer. location: remote. resume: 10 years working with devops and node.js, delivered projects in healthcare domain.",
     "metadata": {
       "employee_id": "EMP0086",
       "primary_skill": "DevOps",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 10,
       "role": "ML Engineer"
     }
@@ -1380,11 +1380,11 @@
     }
   },
   {
-    "text": "employee id: emp0139. name: david alvarez. primary skill: sql. secondary skill: fastapi. experience: 10 years. certifications: scrummaster;databricks-associate;gcp-ace. availability: available. utilization: 0.27. role: cloud engineer. location: riyadh. resume: 10 years working with sql and fastapi, delivered projects in retail domain.",
+    "text": "employee id: emp0139. name: david alvarez. primary skill: sql. secondary skill: fastapi. experience: 10 years. certifications: scrummaster;databricks-associate;gcp-ace. availability: allocated. utilization: 1.0. role: cloud engineer. location: riyadh. resume: 10 years working with sql and fastapi, delivered projects in retail domain.",
     "metadata": {
       "employee_id": "EMP0139",
       "primary_skill": "SQL",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 10,
       "role": "Cloud Engineer"
     }
@@ -2450,11 +2450,11 @@
     }
   },
   {
-    "text": "employee id: emp0246. name: donna landry. primary skill: machine learning. secondary skill: spark. experience: 13 years. certifications: scrummaster;gcp-ace;azure-az900. availability: available. utilization: 0.14. role: qa engineer. location: remote. resume: 13 years working with machine learning and spark, delivered projects in finance domain.",
+    "text": "employee id: emp0246. name: donna landry. primary skill: machine learning. secondary skill: spark. experience: 13 years. certifications: scrummaster;gcp-ace;azure-az900. availability: allocated. utilization: 1.0. role: qa engineer. location: remote. resume: 13 years working with machine learning and spark, delivered projects in finance domain.",
     "metadata": {
       "employee_id": "EMP0246",
       "primary_skill": "Machine Learning",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 13,
       "role": "QA Engineer"
     }
@@ -2740,11 +2740,11 @@
     }
   },
   {
-    "text": "employee id: emp0275. name: joyce bowen. primary skill: java. secondary skill: spark. experience: 10 years. certifications: scrummaster;cka. availability: available. utilization: 0.41. role: qa engineer. location: cairo. resume: 10 years working with java and spark, delivered projects in finance domain.",
+    "text": "employee id: emp0275. name: joyce bowen. primary skill: java. secondary skill: spark. experience: 10 years. certifications: scrummaster;cka. availability: allocated. utilization: 1.0. role: qa engineer. location: cairo. resume: 10 years working with java and spark, delivered projects in finance domain.",
     "metadata": {
       "employee_id": "EMP0275",
       "primary_skill": "Java",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 10,
       "role": "QA Engineer"
     }
@@ -4330,11 +4330,11 @@
     }
   },
   {
-    "text": "employee id: emp0434. name: chad jones. primary skill: machine learning. secondary skill: spark. experience: 8 years. certifications: databricks-associate;gcp-ace;cka. availability: available. utilization: 0.76. role: software engineer. location: dubai. resume: 8 years working with machine learning and spark, delivered projects in retail domain.",
+    "text": "employee id: emp0434. name: chad jones. primary skill: machine learning. secondary skill: spark. experience: 8 years. certifications: databricks-associate;gcp-ace;cka. availability: allocated. utilization: 1.0. role: software engineer. location: dubai. resume: 8 years working with machine learning and spark, delivered projects in retail domain.",
     "metadata": {
       "employee_id": "EMP0434",
       "primary_skill": "Machine Learning",
-      "availability_status": "Available",
+      "availability_status": "Allocated",
       "years_experience": 8,
       "role": "Software Engineer"
     }

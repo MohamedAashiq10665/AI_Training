@@ -480,17 +480,4 @@ Expected output behavior:
 - Returns two top-ranked candidates
 - Cards include score + explanation + matched/missing skill chips + fit badges
 
-## 12. Operational Notes
-
-- If employee data changes significantly, re-indexing and refresh paths are important for retrieval freshness.
-- Assign/unassign APIs trigger RAG refresh helpers to keep recommendation context aligned.
-- Latency can increase when LLM reasons are enabled; deterministic fallback keeps endpoint resilient.
-
-## 13. Future Enhancements
-
-Potential next improvements:
-
-1. Expand intent parser vocabulary for more free-form phrasing.
-2. Add explicit domain/location scoring terms in weighted score.
-3. Add API debug metadata to expose normalized parsed intent in non-production mode.
-4. Add prompt strategy selector in admin UI for live tuning.
+![Output](image.png)

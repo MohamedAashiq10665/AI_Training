@@ -480,4 +480,4 @@ Expected output behavior:
 - Returns two top-ranked candidates
 - Cards include score + explanation + matched/missing skill chips + fit badges
 
-![Output](image.png)
+![alt text](image-1.png)

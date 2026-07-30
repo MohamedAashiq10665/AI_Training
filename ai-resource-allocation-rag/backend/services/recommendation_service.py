@@ -4,8 +4,10 @@ import json
 import re
 from pathlib import Path
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from backend.database.models import HistoricalAllocation, Project
 from backend.models.schemas import RecommendationRequest
 from backend.repositories.employee_repository import EmployeeRepository
 from backend.utils.config import settings
@@ -43,6 +45,37 @@ class RecommendationService:
         )
 
     @staticmethod
+    def _latest_project_domain_map(db: Session, employee_ids: list[str]) -> dict[str, str]:
+        if not employee_ids:
+            return {}
+
+        latest_alloc_subquery = (
+            db.query(
+                HistoricalAllocation.employee_id.label("employee_id"),
+                func.max(HistoricalAllocation.allocation_month).label("latest_month"),
+            )
+            .group_by(HistoricalAllocation.employee_id)
+            .subquery()
+        )
+
+        rows = (
+            db.query(
+                HistoricalAllocation.employee_id,
+                Project.domain,
+            )
+            .join(
+                latest_alloc_subquery,
+                (HistoricalAllocation.employee_id == latest_alloc_subquery.c.employee_id)
+                & (HistoricalAllocation.allocation_month == latest_alloc_subquery.c.latest_month),
+            )
+            .join(Project, Project.project_id == HistoricalAllocation.project_id)
+            .filter(HistoricalAllocation.employee_id.in_(employee_ids))
+            .all()
+        )
+
+        return {str(row.employee_id): str(row.domain or "").strip() for row in rows}
+
+    @staticmethod
     def _normalize_strategy(value: str | None) -> str:
         normalized = str(value or "").strip().lower()
         if normalized in {"zero-shot", "zeroshot", "zero_shot"}:
@@ -67,12 +100,14 @@ class RecommendationService:
             f"\nRequired skills: {', '.join(request.required_skills) or 'None'}"
             f"\nPreferred certifications: {', '.join(request.preferred_certifications) or 'None'}"
             f"\nMinimum experience: {request.min_experience}"
+            f"\nRequested domain: {request.domain or 'None'}"
             f"\nCandidate: {employee['name']} ({employee['employee_id']})"
             f"\nCandidate primary skill: {employee['primary_skill']}"
             f"\nCandidate secondary skill: {employee['secondary_skill']}"
             f"\nCandidate certifications: {employee['certifications'] or 'None'}"
             f"\nCandidate experience: {employee['years_experience']}"
             f"\nCandidate utilization: {float(employee['current_utilization'] or 0.0):.2f}"
+            f"\nCandidate latest project domain: {employee.get('latest_project_domain') or 'Unknown'}"
             f"\nMatched skills: {', '.join(result['skills_matched']) or 'None'}"
             f"\nMissing skills: {', '.join(result['missing_skills']) or 'None'}"
         )
@@ -196,6 +231,7 @@ class RecommendationService:
                     f"skills_matched={', '.join(item.get('skills_matched', [])) or 'None'}; "
                     f"missing_skills={', '.join(item.get('missing_skills', [])) or 'None'}; "
                     f"availability={item.get('availability', 'Unknown')}; "
+                    f"latest_project_domain={item.get('latest_project_domain', 'Unknown')}; "
                     f"experience_fit={self._safe_float(item.get('component_scores', {}).get('experience')):.3f}; "
                     f"certification_fit={self._safe_float(item.get('component_scores', {}).get('certifications')):.3f}"
                 )
@@ -210,6 +246,7 @@ class RecommendationService:
             f"\nRequired skills: {', '.join(request.required_skills) or 'None'}"
             f"\nPreferred certifications: {', '.join(request.preferred_certifications) or 'None'}"
             f"\nMinimum experience: {request.min_experience}"
+            f"\nRequested domain: {request.domain or 'None'}"
             "\nCandidates:"
             f"\n{chr(10).join(candidate_lines)}"
         )
@@ -230,25 +267,51 @@ class RecommendationService:
         if not Path("data/employees.index").exists() or not Path("data/employees_meta.json").exists():
             self.rag_pipeline.build_index_from_records(employee_records)
 
+        query_text = f"{request.project_name} requiring {' '.join(request.required_skills)}"
+        if request.domain:
+            query_text = f"{query_text} domain {request.domain}"
+        if request.location:
+            query_text = f"{query_text} location {request.location}"
+
         candidates = self.rag_pipeline.retrieve_candidates(
-            query=f"{request.project_name} requiring {' '.join(request.required_skills)}",
+            query=query_text,
             top_k=max(15, request.required_count * 5),
             availability_only=True,
         )
 
         employee_lookup = {str(row["employee_id"]): row for row in employee_records}
+        candidate_ids = [str(item["metadata"].get("employee_id", "")).strip() for item in candidates if item.get("metadata")]
+        latest_project_domain = self._latest_project_domain_map(db, [item for item in candidate_ids if item])
+        normalized_requested_domain = str(request.domain or "").strip().lower()
+
         scored = []
         for candidate in candidates:
             employee_id = str(candidate["metadata"].get("employee_id"))
             if employee_id not in employee_lookup:
                 continue
             employee = employee_lookup[employee_id]
-            result = compute_weighted_score(employee, request.model_dump())
+            employee_with_context = {
+                **employee,
+                "latest_project_domain": latest_project_domain.get(employee_id, ""),
+            }
+            result = compute_weighted_score(employee_with_context, request.model_dump())
+
+            candidate_domain = str(employee_with_context.get("latest_project_domain") or "").strip().lower()
+            domain_match = bool(
+                normalized_requested_domain
+                and candidate_domain
+                and candidate_domain == normalized_requested_domain
+            )
+
+            if normalized_requested_domain:
+                domain_bonus = 6.0 if domain_match else 0.0
+                result["match_score"] = round(min(100.0, self._safe_float(result.get("match_score")) + domain_bonus), 2)
+                result.setdefault("component_scores", {})["domain"] = 1.0 if domain_match else 0.0
 
             recommendation_reason = self._fallback_reason(employee, result)
             if use_llm_reasons:
                 try:
-                    recommendation_reason = self._llm_reason(request, employee, result)
+                    recommendation_reason = self._llm_reason(request, employee_with_context, result)
                 except Exception:
                     recommendation_reason = self._fallback_reason(employee, result)
 
@@ -266,6 +329,8 @@ class RecommendationService:
                     "availability": employee["availability_status"],
                     "upskilling_suggestions": result["upskilling_suggestions"],
                     "component_scores": result["component_scores"],
+                    "latest_project_domain": employee_with_context.get("latest_project_domain"),
+                    "domain_match": domain_match,
                 }
             )
 
@@ -273,7 +338,14 @@ class RecommendationService:
         if should_rerank and scored:
             alpha = max(0.0, min(1.0, self._safe_float(settings.recommendation_llm_rerank_alpha, default=0.7)))
             rerank_top_n = max(1, int(settings.recommendation_llm_rerank_top_n or 20))
-            preselected = sorted(scored, key=lambda x: x["match_score"], reverse=True)[: max(request.required_count, rerank_top_n)]
+            if normalized_requested_domain:
+                preselected = sorted(
+                    scored,
+                    key=lambda x: (1 if x.get("domain_match") else 0, x["match_score"]),
+                    reverse=True,
+                )[: max(request.required_count, rerank_top_n)]
+            else:
+                preselected = sorted(scored, key=lambda x: x["match_score"], reverse=True)[: max(request.required_count, rerank_top_n)]
             try:
                 llm_scores = self._llm_rerank_candidates(request, preselected)
                 for item in scored:
@@ -289,5 +361,11 @@ class RecommendationService:
             except Exception:
                 pass
 
-        scored.sort(key=lambda x: x["match_score"], reverse=True)
+        if normalized_requested_domain:
+            scored.sort(
+                key=lambda x: (1 if x.get("domain_match") else 0, x["match_score"]),
+                reverse=True,
+            )
+        else:
+            scored.sort(key=lambda x: x["match_score"], reverse=True)
         return scored[: request.required_count]

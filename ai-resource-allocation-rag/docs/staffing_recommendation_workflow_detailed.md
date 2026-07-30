@@ -466,18 +466,18 @@ Return concise recommendations with reasoning and skill gaps.
 
 Prompt:
 
-`Suggest 2 Python engineers with minimum 3 years experience`
+`Suggest 12 AWS engineers with minimum 3 years experience in Finance domain`
 
 Expected behind-the-scenes normalization:
 
-- required_skills: Python
-- required_count: 2
+- required_skills: AWs
+- required_count: 12
 - min_experience: 3
-- location/domain: unchanged unless stated
+- domain: Finance
 
 Expected output behavior:
 
-- Returns two top-ranked candidates
+- Returns 11 top-ranked candidates
 - Cards include score + explanation + matched/missing skill chips + fit badges
 
 ![alt text](image-1.png)
